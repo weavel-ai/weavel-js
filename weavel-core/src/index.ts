@@ -3,8 +3,8 @@ import {
   removeTrailingSlash,
   retriable,
   safeSetTimeout,
-  type RetriableOptions
-} from "./utils";
+  type RetriableOptions,
+} from './utils';
 import {
   type WeavelFetchOptions,
   type WeavelFetchResponse,
@@ -23,35 +23,47 @@ import {
   type UpdateTraceBody,
   type UpdateSpanBody,
   type UpdateGenerationBody,
-} from "./types";
+} from './types';
 
-import { SimpleEventEmitter } from "./eventemitter";
-export * as utils from "./utils";
-export {type SingleIngestionEvent} from "./types";
-export { WeavelMemoryStorage } from "./storage-memory";
+import { SimpleEventEmitter } from './eventemitter';
+export * as utils from './utils';
+export { type SingleIngestionEvent } from './types';
+export { WeavelMemoryStorage } from './storage-memory';
 
 class WeavelFetchHttpError extends Error {
-  name = "WeavelFetchHttpError";
+  name = 'WeavelFetchHttpError';
   body: string | undefined;
 
   constructor(
     public response: WeavelFetchResponse,
     body: string
   ) {
-    super("HTTP error while fetching Weavel: " + response.status + " and body: " + body);
+    super(
+      'HTTP error while fetching Weavel: ' +
+        response.status +
+        ' and body: ' +
+        body
+    );
   }
 }
 
 class WeavelFetchNetworkError extends Error {
-  name = "WeavelFetchNetworkError";
+  name = 'WeavelFetchNetworkError';
 
   constructor(public error: unknown) {
-    super("Network error while fetching Weavel", error instanceof Error ? { cause: error } : {});
+    super(
+      'Network error while fetching Weavel',
+      error instanceof Error ? { cause: error } : {}
+    );
   }
 }
 
 function isWeavelFetchError(err: any): boolean {
-  return typeof err === "object" && (err.name === "WeavelFetchHttpError" || err.name === "WeavelFetchNetworkError");
+  return (
+    typeof err === 'object' &&
+    (err.name === 'WeavelFetchHttpError' ||
+      err.name === 'WeavelFetchNetworkError')
+  );
 }
 
 abstract class WeavelCoreStateless {
@@ -75,21 +87,29 @@ abstract class WeavelCoreStateless {
   protected _retryOptions: RetriableOptions;
 
   // Abstract methods to be overridden by implementations
-  abstract fetch(url: string, options: WeavelFetchOptions): Promise<WeavelFetchResponse>;
+  abstract fetch(
+    url: string,
+    options: WeavelFetchOptions
+  ): Promise<WeavelFetchResponse>;
   abstract getLibraryId(): string;
   abstract getLibraryVersion(): string;
 
   // This is our abstracted storage. Each implementation should handle its own
   abstract getPersistedProperty<T>(key: WeavelPersistedProperty): T | undefined;
-  abstract setPersistedProperty<T>(key: WeavelPersistedProperty, value: T | null): void;
+  abstract setPersistedProperty<T>(
+    key: WeavelPersistedProperty,
+    value: T | null
+  ): void;
 
   constructor(params: WeavelCoreOptions) {
     this._options = params;
     const { apiKey, enabled, ...options } = params;
 
     this.enabled = enabled === false ? false : true;
-    this.apiKey = apiKey ?? "";
-    this.baseUrl = removeTrailingSlash(options?.baseUrl || "https://api.weavel.ai");
+    this.apiKey = apiKey ?? '';
+    this.baseUrl = removeTrailingSlash(
+      options?.baseUrl || 'https://api.weavel.ai'
+    );
     this.flushAt = options?.flushAt ? Math.max(options?.flushAt, 1) : 15;
     this.flushInterval = options?.flushInterval ?? 10000;
 
@@ -100,7 +120,7 @@ abstract class WeavelCoreStateless {
     };
     this.requestTimeout = options?.requestTimeout ?? 10000; // 10 seconds
 
-    this.sdkIntegration = options?.sdkIntegration ?? "DEFAULT";
+    this.sdkIntegration = options?.sdkIntegration ?? 'DEFAULT';
   }
 
   getSdkIntegration(): string {
@@ -124,8 +144,8 @@ abstract class WeavelCoreStateless {
     this.debugMode = enabled;
 
     if (enabled) {
-      this.removeDebugCallback = this.on("*", (event, payload) =>
-        console.log("Weavel Debug", event, JSON.stringify(payload))
+      this.removeDebugCallback = this.on('*', (event, payload) =>
+        console.log('Weavel Debug', event, JSON.stringify(payload))
       );
     }
   }
@@ -143,54 +163,54 @@ abstract class WeavelCoreStateless {
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
-    this.enqueue("capture-session", parsedBody);
+    this.enqueue('capture-session', parsedBody);
     return session_id;
   }
 
   protected identifyUserStateless(body: IdentifyUserBody): string {
-    const {  created_at: bodyCreatedAt, ...rest } = body;
+    const { created_at: bodyCreatedAt, ...rest } = body;
 
     const parsedBody: IdentifyUserBody = {
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
-    this.enqueue("identify-user", parsedBody);
+    this.enqueue('identify-user', parsedBody);
     return body.user_id;
   }
 
   protected messageStateless(body: CaptureMessageBody): string {
-    const { record_id: bodyId,  ...rest } = body;
+    const { record_id: bodyId, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureMessageBody = {
       record_id,
       ...rest,
     };
-    this.enqueue("capture-message", parsedBody);
+    this.enqueue('capture-message', parsedBody);
     return record_id;
   }
 
   protected trackEventStateless(body: CaptureTrackEventBody): string {
-    const { record_id: bodyId,  ...rest } = body;
+    const { record_id: bodyId, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTrackEventBody = {
       record_id,
       ...rest,
     };
-    this.enqueue("capture-track-event", parsedBody);
+    this.enqueue('capture-track-event', parsedBody);
     return record_id;
   }
 
   protected traceStateless(body: CaptureTraceBody): string {
-    const { record_id: bodyId,  ...rest } = body;
+    const { record_id: bodyId, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTraceBody = {
       record_id,
       ...rest,
     };
-    this.enqueue("capture-trace", parsedBody);
+    this.enqueue('capture-trace', parsedBody);
     return record_id;
   }
 
@@ -204,13 +224,11 @@ abstract class WeavelCoreStateless {
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
-    this.enqueue("capture-span", parsedBody);
+    this.enqueue('capture-span', parsedBody);
     return observation_id;
   }
 
-  protected generationStateless(
-    body: CaptureGenerationBody
-  ): string {
+  protected generationStateless(body: CaptureGenerationBody): string {
     const { observation_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
 
     const observation_id = bodyId || generateUUID();
@@ -221,7 +239,7 @@ abstract class WeavelCoreStateless {
       ...rest,
     };
 
-    this.enqueue("capture-generation", parsedBody);
+    this.enqueue('capture-generation', parsedBody);
     return observation_id;
   }
 
@@ -234,24 +252,22 @@ abstract class WeavelCoreStateless {
       observation_id,
       ...rest,
     };
-    this.enqueue("capture-log", parsedBody);
+    this.enqueue('capture-log', parsedBody);
     return observation_id;
   }
 
   protected updateTraceStateless(body: UpdateTraceBody): string {
-    this.enqueue("update-trace", body);
+    this.enqueue('update-trace', body);
     return body.record_id;
   }
 
   protected updateSpanStateless(body: UpdateSpanBody): string {
-    this.enqueue("update-span", body);
+    this.enqueue('update-span', body);
     return body.observation_id;
   }
 
-  protected updateGenerationStateless(
-    body: UpdateGenerationBody
-  ): string {
-    this.enqueue("update-generation", body);
+  protected updateGenerationStateless(body: UpdateGenerationBody): string {
+    this.enqueue('update-generation', body);
     return body.observation_id;
   }
 
@@ -276,18 +292,27 @@ abstract class WeavelCoreStateless {
         JSON.stringify(body);
       } catch (e) {
         console.error(`Event Body for ${type} is not JSON-serializable: ${e}`);
-        this._events.emit("error", `Event Body for ${type} is not JSON-serializable: ${e}`);
+        this._events.emit(
+          'error',
+          `Event Body for ${type} is not JSON-serializable: ${e}`
+        );
 
         return;
       }
 
-      const queue = this.getPersistedProperty<WeavelQueueItem[]>(WeavelPersistedProperty.Queue) || [];
+      const queue =
+        this.getPersistedProperty<WeavelQueueItem[]>(
+          WeavelPersistedProperty.Queue
+        ) || [];
 
       queue.push({
         type,
-        ...body,
+        body,
       });
-      this.setPersistedProperty<WeavelQueueItem[]>(WeavelPersistedProperty.Queue, queue);
+      this.setPersistedProperty<WeavelQueueItem[]>(
+        WeavelPersistedProperty.Queue,
+        queue
+      );
 
       this._events.emit(type, body);
 
@@ -297,10 +322,13 @@ abstract class WeavelCoreStateless {
       }
 
       if (this.flushInterval && !this._flushTimer) {
-        this._flushTimer = safeSetTimeout(() => this.flush(), this.flushInterval);
+        this._flushTimer = safeSetTimeout(
+          () => this.flush(),
+          this.flushInterval
+        );
       }
     } catch (e) {
-      this._events.emit("error", e);
+      this._events.emit('error', e);
     }
   }
 
@@ -316,14 +344,14 @@ abstract class WeavelCoreStateless {
       try {
         this.flush((err, data) => {
           if (err) {
-            console.error("Error while flushing Weavel", err);
+            console.error('Error while flushing Weavel', err);
             resolve();
           } else {
             resolve(data);
           }
         });
       } catch (e) {
-        console.error("Error while flushing Weavel", e);
+        console.error('Error while flushing Weavel', e);
       }
     });
   }
@@ -335,14 +363,20 @@ abstract class WeavelCoreStateless {
       this._flushTimer = null;
     }
 
-    const queue = this.getPersistedProperty<WeavelQueueItem[]>(WeavelPersistedProperty.Queue) || [];
+    const queue =
+      this.getPersistedProperty<WeavelQueueItem[]>(
+        WeavelPersistedProperty.Queue
+      ) || [];
 
     if (!queue.length) {
       return callback?.();
     }
 
     const items = queue.splice(0, this.flushAt);
-    this.setPersistedProperty<WeavelQueueItem[]>(WeavelPersistedProperty.Queue, queue);
+    this.setPersistedProperty<WeavelQueueItem[]>(
+      WeavelPersistedProperty.Queue,
+      queue
+    );
 
     const MAX_MSG_SIZE = 1_000_000;
     const BATCH_SIZE_LIMIT = 2_500_000;
@@ -353,10 +387,10 @@ abstract class WeavelCoreStateless {
 
     const done = (err?: any): void => {
       if (err) {
-        this._events.emit("error", err);
+        this._events.emit('error', err);
       }
       callback?.(err, items);
-      this._events.emit("flush", items);
+      this._events.emit('flush', items);
     };
 
     const payload = JSON.stringify({
@@ -366,14 +400,14 @@ abstract class WeavelCoreStateless {
         sdk_integration: this.sdkIntegration,
         sdk_version: this.getLibraryVersion(),
         sdk_variant: this.getLibraryId(),
-        sdk_name: "weavel-js",
+        sdk_name: 'weavel-js',
       },
     }); // implicit conversion also of dates to strings
 
-    const url = `${this.baseUrl}/api/public/v2/batch`;
+    const url = `${this.baseUrl}/public/v2/batch`;
 
     const fetchOptions = this._getFetchOptions({
-      method: "POST",
+      method: 'POST',
       body: payload,
     });
 
@@ -403,7 +437,9 @@ abstract class WeavelCoreStateless {
 
         // discard item if it exceeds the maximum size per event
         if (itemSize > MAX_MSG_SIZE) {
-          console.warn(`Item exceeds size limit (size: ${itemSize}), dropping item.`);
+          console.warn(
+            `Item exceeds size limit (size: ${itemSize}), dropping item.`
+          );
           continue;
         }
 
@@ -430,17 +466,17 @@ abstract class WeavelCoreStateless {
   }
 
   _getFetchOptions(p: {
-    method: WeavelFetchOptions["method"];
-    body?: WeavelFetchOptions["body"];
+    method: WeavelFetchOptions['method'];
+    body?: WeavelFetchOptions['body'];
   }): WeavelFetchOptions {
     const fetchOptions: WeavelFetchOptions = {
       method: p.method,
       headers: {
-        "Content-Type": "application/json",
-        "X-Weavel-Sdk-Name": "weavel-js",
-        "X-Weavel-Sdk-Version": this.getLibraryVersion(),
-        "X-Weavel-Sdk-Variant": this.getLibraryId(),
-        "X-Weavel-Sdk-Integration": this.sdkIntegration,
+        'Content-Type': 'application/json',
+        'X-Weavel-Sdk-Name': 'weavel-js',
+        'X-Weavel-Sdk-Version': this.getLibraryVersion(),
+        'X-Weavel-Sdk-Variant': this.getLibraryId(),
+        'X-Weavel-Sdk-Integration': this.sdkIntegration,
         ...this.constructAuthorizationHeader(this.apiKey),
       },
       body: p.body,
@@ -449,12 +485,10 @@ abstract class WeavelCoreStateless {
     return fetchOptions;
   }
 
-  private constructAuthorizationHeader(
-    apiKey: string,
-  ): {
+  private constructAuthorizationHeader(apiKey: string): {
     Authorization: string;
   } {
-      return { Authorization: "Bearer " + apiKey };
+    return { Authorization: 'Bearer ' + apiKey };
   }
 
   private async fetchWithRetry(
@@ -488,7 +522,11 @@ abstract class WeavelCoreStateless {
         return res;
       },
       { ...this._retryOptions, ...retryOptions },
-      (string) => this._events.emit("retry", string + ", " + url + ", " + JSON.stringify(options))
+      (string) =>
+        this._events.emit(
+          'retry',
+          string + ', ' + url + ', ' + JSON.stringify(options)
+        )
     );
   }
 
@@ -506,7 +544,7 @@ abstract class WeavelCoreStateless {
       // flush again in case there are new events that were added while we were waiting for the pending promises to resolve
       await this.flushAsync();
     } catch (e) {
-      console.error("Error while shutting down Weavel", e);
+      console.error('Error while shutting down Weavel', e);
     }
   }
 
@@ -523,7 +561,9 @@ export abstract class WeavelWebStateless extends WeavelCoreStateless {
     let isObservabilityEnabled = enabled === false ? false : true;
 
     if (!isObservabilityEnabled) {
-      console.warn("Weavel is disabled. No observability data will be sent to Weavel.");
+      console.warn(
+        'Weavel is disabled. No observability data will be sent to Weavel.'
+      );
     } else if (!apiKey) {
       isObservabilityEnabled = false;
       console.warn(
@@ -552,7 +592,7 @@ export abstract class WeavelWebStateless extends WeavelCoreStateless {
     await this.awaitAllQueuedAndPendingRequests();
     return s;
   }
-  
+
   async track(body: CaptureTrackEventBody): Promise<this> {
     this.trackEventStateless(body);
     await this.awaitAllQueuedAndPendingRequests();
@@ -564,28 +604,27 @@ export abstract class WeavelWebStateless extends WeavelCoreStateless {
     await this.awaitAllQueuedAndPendingRequests();
     return this;
   }
-  
 }
 
 export class WeavelWebSessionClient {
   public readonly client: WeavelWebStateless;
   public readonly id: string; // id of item itself
 
-  constructor(
-    client: WeavelWebStateless,
-    id: string
-  ) {
+  constructor(client: WeavelWebStateless, id: string) {
     this.client = client;
     this.id = id;
-  
   }
 
-  async track(body: Omit<CaptureTrackEventBody, "session_id">): Promise<WeavelWebStateless> {
-    return this.client.track({session_id: this.id, ...body});
+  async track(
+    body: Omit<CaptureTrackEventBody, 'session_id'>
+  ): Promise<WeavelWebStateless> {
+    return this.client.track({ session_id: this.id, ...body });
   }
 
-  async message(body: Omit<CaptureMessageBody, "session_id">): Promise<WeavelWebStateless> {
-    return this.client.message({session_id: this.id ,...body})
+  async message(
+    body: Omit<CaptureMessageBody, 'session_id'>
+  ): Promise<WeavelWebStateless> {
+    return this.client.message({ session_id: this.id, ...body });
   }
 }
 
@@ -595,24 +634,26 @@ export abstract class WeavelCore extends WeavelCoreStateless {
     let isObservabilityEnabled = enabled === false ? false : true;
 
     if (!isObservabilityEnabled) {
-      console.warn("Weavel is disabled. No observability data will be sent to Weavel.");
+      console.warn(
+        'Weavel is disabled. No observability data will be sent to Weavel.'
+      );
     } else if (!apiKey) {
       isObservabilityEnabled = false;
       console.warn(
         "Weavel API key was not passed to constructor or not set as 'WEAVEL_API_KEY' environment variable. No observability data will be sent to Weavel."
       );
-    } 
+    }
 
     super({ ...params, enabled: isObservabilityEnabled });
   }
-  
+
   identify(body: IdentifyUserBody): this {
     this.identifyUserStateless(body);
     return this;
   }
 
   session(body: CaptureSessionBody): WeavelSessionClient {
-    const id = this.sessionStateless(body );
+    const id = this.sessionStateless(body);
     const s = new WeavelSessionClient(this, id);
     return s;
   }
@@ -628,9 +669,7 @@ export abstract class WeavelCore extends WeavelCoreStateless {
     return new WeavelSpanClient(this, id, body.record_id);
   }
 
-  generation(
-    body: CaptureGenerationBody
-  ): WeavelGenerationClient {
+  generation(body: CaptureGenerationBody): WeavelGenerationClient {
     const id = this.generationStateless(body);
     return new WeavelGenerationClient(this, id, body.record_id);
   }
@@ -660,31 +699,25 @@ export class WeavelSessionClient {
   public readonly client: WeavelCore;
   public readonly id: string; // id of item itself
 
-  constructor(
-    client: WeavelCore,
-    id: string
-  ) {
+  constructor(client: WeavelCore, id: string) {
     this.client = client;
     this.id = id;
-  
   }
 
-  trace(body: Omit<CaptureTraceBody, "session_id">): WeavelTraceClient {
-    return this.client.trace({session_id: this.id, ...body});
+  trace(body: Omit<CaptureTraceBody, 'session_id'>): WeavelTraceClient {
+    return this.client.trace({ session_id: this.id, ...body });
   }
 
   span(body: CaptureSpanBody): WeavelSpanClient {
-    return this.client.span(body)
+    return this.client.span(body);
   }
 
-  generation(
-    body: CaptureGenerationBody
-  ): WeavelGenerationClient {
-    return this.client.generation(body)
+  generation(body: CaptureGenerationBody): WeavelGenerationClient {
+    return this.client.generation(body);
   }
 
   log(body: CaptureLogBody): WeavelCore {
-    return this.client.log(body)
+    return this.client.log(body);
   }
 }
 
@@ -711,30 +744,43 @@ export abstract class WeavelObjectClient {
     this.observationId = observationId;
   }
 
-  span(body: Omit<CaptureSpanBody, "record_id" | "parent_observation_id">): WeavelSpanClient {
-    return this.client.span({...body, record_id: this.recordId,
-      parent_observation_id: this.observationId});
+  span(
+    body: Omit<CaptureSpanBody, 'record_id' | 'parent_observation_id'>
+  ): WeavelSpanClient {
+    return this.client.span({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
   }
 
-  log(body: Omit<CaptureLogBody, "record_id" | "parent_observation_id">): WeavelCore {
-    return this.client.log({...body, record_id: this.recordId,
-      parent_observation_id: this.observationId});
+  log(
+    body: Omit<CaptureLogBody, 'record_id' | 'parent_observation_id'>
+  ): WeavelCore {
+    return this.client.log({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
   }
 
-  generation(body: Omit<CaptureGenerationBody, "record_id" | "parent_observation_id">): WeavelGenerationClient {
-    return this.client.generation({...body, record_id: this.recordId,
-      parent_observation_id: this.observationId});
+  generation(
+    body: Omit<CaptureGenerationBody, 'record_id' | 'parent_observation_id'>
+  ): WeavelGenerationClient {
+    return this.client.generation({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
   }
-
 }
-
 
 export class WeavelTraceClient extends WeavelObjectClient {
   constructor(client: WeavelCore, recordId: string) {
     super({ client, id: recordId, recordId, observationId: null });
   }
 
-  update(body: Omit<UpdateTraceBody, "record_id">): this {
+  update(body: Omit<UpdateTraceBody, 'record_id'>): this {
     this.client._updateTrace({
       ...body,
       record_id: this.id,
@@ -742,7 +788,7 @@ export class WeavelTraceClient extends WeavelObjectClient {
     return this;
   }
 
-  end(body?: Omit<UpdateTraceBody, "record_id" | "ended_at" >): this {
+  end(body?: Omit<UpdateTraceBody, 'record_id' | 'ended_at'>): this {
     this.client._updateTrace({
       ...body,
       record_id: this.id,
@@ -754,10 +800,10 @@ export class WeavelTraceClient extends WeavelObjectClient {
 
 export class WeavelSpanClient extends WeavelObjectClient {
   constructor(client: WeavelCore, id: string, recordId: string) {
-    super({client, id, recordId, observationId: id});
+    super({ client, id, recordId, observationId: id });
   }
 
-  update(body: Omit<UpdateSpanBody, "observation_id" | "record_id">): this {
+  update(body: Omit<UpdateSpanBody, 'observation_id' | 'record_id'>): this {
     this.client._updateSpan({
       ...body,
       record_id: this.recordId,
@@ -766,8 +812,7 @@ export class WeavelSpanClient extends WeavelObjectClient {
     return this;
   }
 
-
-  end(body: Omit<UpdateSpanBody, "observation_id" | "ended_at" >): this {
+  end(body: Omit<UpdateSpanBody, 'observation_id' | 'ended_at'>): this {
     this.client._updateSpan({
       ...body,
       record_id: this.recordId,
@@ -783,17 +828,15 @@ export class WeavelGenerationClient {
   public readonly id: string; // id of generation
   public readonly recordId: string; // id of trace
 
-  constructor(
-    client: WeavelCore,
-    id: string,
-    recordId: string,
-  ) {
+  constructor(client: WeavelCore, id: string, recordId: string) {
     this.client = client;
     this.id = id;
     this.recordId = recordId;
   }
 
-  update(body: Omit<UpdateGenerationBody, "observation_id" | "record_id">): this {
+  update(
+    body: Omit<UpdateGenerationBody, 'observation_id' | 'record_id'>
+  ): this {
     this.client._updateGeneration({
       ...body,
       record_id: this.recordId,
@@ -802,8 +845,7 @@ export class WeavelGenerationClient {
     return this;
   }
 
-
-  end(body: Omit<UpdateGenerationBody, "observation_id" | "ended_at" >): this {
+  end(body: Omit<UpdateGenerationBody, 'observation_id' | 'ended_at'>): this {
     this.client._updateGeneration({
       ...body,
       record_id: this.recordId,
@@ -812,8 +854,7 @@ export class WeavelGenerationClient {
     });
     return this;
   }
-
 }
 
-export * from "./types";
-export * from "./openapi/server";
+export * from './types';
+export * from './openapi/server';
