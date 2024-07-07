@@ -179,11 +179,12 @@ abstract class WeavelCoreStateless {
   }
 
   protected messageStateless(body: CaptureMessageBody): string {
-    const { record_id: bodyId, ...rest } = body;
+    const { record_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureMessageBody = {
       record_id,
+      created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
     this.enqueue('capture-message', parsedBody);
@@ -191,11 +192,12 @@ abstract class WeavelCoreStateless {
   }
 
   protected trackEventStateless(body: CaptureTrackEventBody): string {
-    const { record_id: bodyId, ...rest } = body;
+    const { record_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTrackEventBody = {
       record_id,
+      created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
     this.enqueue('capture-track-event', parsedBody);
@@ -203,11 +205,12 @@ abstract class WeavelCoreStateless {
   }
 
   protected traceStateless(body: CaptureTraceBody): string {
-    const { record_id: bodyId, ...rest } = body;
+    const { record_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTraceBody = {
       record_id,
+      created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
     this.enqueue('capture-trace', parsedBody);
@@ -244,12 +247,13 @@ abstract class WeavelCoreStateless {
   }
 
   protected logStateless(body: CaptureLogBody): string {
-    const { observation_id: bodyId, ...rest } = body;
+    const { observation_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
 
     const observation_id = bodyId || generateUUID();
 
     const parsedBody: CaptureLogBody = {
       observation_id,
+      created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
     this.enqueue('capture-log', parsedBody);
