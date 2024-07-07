@@ -1,0 +1,59 @@
+{
+  "name": "weavel",
+  "version": "0.1.0",
+  "engines": {
+    "node": ">=18"
+  },
+  "author": {
+    "name": "Weavel",
+    "email": "hello@weavel.ai",
+    "url": "https://weavel.ai"
+  },
+  "license": "MIT",
+  "main": "lib/index.cjs.js",
+  "module": "lib/index.mjs",
+  "types": "lib/index.d.ts",
+  "exports": {
+    "require": {
+      "types": "./lib/index.d.ts",
+      "default": "./lib/index.cjs.js"
+    },
+    "import": {
+      "types": "./lib/index.d.mts",
+      "default": "./lib/index.mjs"
+    }
+  },
+  "files": [
+    "dist",
+    "src"
+  ],
+  "scripts": {
+    "size": "size-limit",
+    "analyze": "size-limit --why"
+  },
+  "prettier": {
+    "printWidth": 80,
+    "semi": true,
+    "singleQuote": true,
+    "trailingComma": "es5"
+  },
+  "size-limit": [
+    {
+      "path": "dist/weavel.cjs.production.min.js",
+      "limit": "10 KB"
+    },
+    {
+      "path": "dist/weavel.esm.js",
+      "limit": "10 KB"
+    }
+  ],
+  "devDependencies": {
+    "@size-limit/preset-small-lib": "^11.1.4",
+    "husky": "^9.0.11",
+    "size-limit": "^11.1.4",
+    "tsdx": "^0.14.1",
+    "tslib": "^2.6.3",
+    "typescript": "^5.5.3"
+  },
+  "dependencies": {}
+}
