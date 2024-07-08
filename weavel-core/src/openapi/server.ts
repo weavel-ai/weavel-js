@@ -15,7 +15,13 @@ export interface paths {
         put?: never;
         /**
          * Capture Batch
-         * @description Batch Execution of POST APIs
+         * @description Capture a batch of tasks and save them in the database for processing.
+         *
+         *     Args:
+         *         body (BatchRequestBody): The request body containing the batch of tasks.
+         *
+         *     Returns:
+         *         Response: The HTTP response with status code 200.
          */
         post: operations["capture_batch_public_v2_batch_post"];
         delete?: never;
@@ -53,19 +59,11 @@ export interface components {
          */
         CaptureGenerationBody: {
             /**
-             * Record Id
-             * @description The unique identifier for the record.
-             */
-            record_id: string;
-            /**
              * Created At
              * @description The datetime when the observation was captured. Optional.
              */
             created_at?: string | null;
-            /**
-             * Name
-             * @description The name of the observation. Optional.
-             */
+            /** Name */
             name: string;
             /**
              * Parent Observation Id
@@ -77,16 +75,22 @@ export interface components {
              * @description The unique identifier for the observation. Optional.
              */
             observation_id?: string | null;
+            /** Record Id */
+            record_id?: string | null;
             /**
              * Inputs
              * @description The inputs of the generation. Optional.
              */
-            inputs?: Record<string, never> | null;
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Outputs
              * @description The outputs of the generation. Optional.
              */
-            outputs?: Record<string, never> | null;
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
         };
         /**
          * CaptureGenerationRequest
@@ -115,19 +119,11 @@ export interface components {
          */
         CaptureLogBody: {
             /**
-             * Record Id
-             * @description The unique identifier for the record.
-             */
-            record_id: string;
-            /**
              * Created At
              * @description The datetime when the observation was captured. Optional.
              */
             created_at?: string | null;
-            /**
-             * Name
-             * @description The name of the observation. Optional.
-             */
+            /** Name */
             name: string;
             /**
              * Parent Observation Id
@@ -139,6 +135,8 @@ export interface components {
              * @description The unique identifier for the observation. Optional.
              */
             observation_id?: string | null;
+            /** Record Id */
+            record_id?: string | null;
             /**
              * Value
              * @description The value of the observation. Optional.
@@ -173,11 +171,6 @@ export interface components {
          */
         CaptureMessageBody: {
             /**
-             * Session Id
-             * @description The unique identifier for the record.
-             */
-            session_id: string;
-            /**
              * Record Id
              * @description The unique identifier for the record. Optional.
              */
@@ -191,12 +184,16 @@ export interface components {
              * Metadata
              * @description Additional metadata associated with the record. Optional.
              */
-            metadata?: Record<string, never> | null;
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
             /**
              * Ref Record Id
              * @description The record ID to reference. Optional.
              */
             ref_record_id?: string | null;
+            /** Session Id */
+            session_id: string;
             /**
              * Role
              * @description The role of the session, 'user', 'assistant', 'system'.
@@ -228,202 +225,6 @@ export interface components {
             body: components["schemas"]["CaptureMessageBody"];
         };
         /**
-         * CaptureSpanBody
-         * @description Represents the body of a capture span observation.
-         *
-         *     Attributes:
-         *         inputs (Optional[Dict[str, Any]]): The inputs of the generation. Optional.
-         *         outputs (Optional[Dict[str, Any]]): The outputs of the generation. Optional.
-         */
-        CaptureSpanBody: {
-            /**
-             * Record Id
-             * @description The unique identifier for the record.
-             */
-            record_id: string;
-            /**
-             * Created At
-             * @description The datetime when the observation was captured. Optional.
-             */
-            created_at?: string | null;
-            /**
-             * Name
-             * @description The name of the observation. Optional.
-             */
-            name: string;
-            /**
-             * Parent Observation Id
-             * @description The parent observation ID. Optional.
-             */
-            parent_observation_id?: string | null;
-            /**
-             * Observation Id
-             * @description The unique identifier for the observation. Optional.
-             */
-            observation_id?: string | null;
-            /**
-             * Inputs
-             * @description The inputs of the generation. Optional.
-             */
-            inputs?: Record<string, never> | null;
-            /**
-             * Outputs
-             * @description The outputs of the generation. Optional.
-             */
-            outputs?: Record<string, never> | null;
-        };
-        /**
-         * CaptureSpanRequest
-         * @description Represents a request to capture a span.
-         *
-         *     Attributes:
-         *         type (Literal[IngestionType.CaptureSpan]): The type of ingestion, set to IngestionType.CaptureSpan.
-         *         body (CaptureSpanBody): The body of the capture span request.
-         */
-        CaptureSpanRequest: {
-            /**
-             * Type
-             * @default capture-span
-             * @constant
-             * @enum {string}
-             */
-            type: "capture-span";
-            body: components["schemas"]["CaptureSpanBody"];
-        };
-        /**
-         * CaptureTraceBody
-         * @description Represents the body of a capture trace record.
-         *
-         *     Attributes:
-         *         name (str): The name of the record. Optional.
-         */
-        CaptureTraceBody: {
-            /**
-             * Session Id
-             * @description The unique identifier for the record.
-             */
-            session_id: string;
-            /**
-             * Record Id
-             * @description The unique identifier for the record. Optional.
-             */
-            record_id?: string | null;
-            /**
-             * Created At
-             * @description The datetime when the record was captured. Optional.
-             */
-            created_at?: string | null;
-            /**
-             * Metadata
-             * @description Additional metadata associated with the record. Optional.
-             */
-            metadata?: Record<string, never> | null;
-            /**
-             * Ref Record Id
-             * @description The record ID to reference. Optional.
-             */
-            ref_record_id?: string | null;
-            /**
-             * Name
-             * @description The name of the record. Optional.
-             */
-            name: string;
-        };
-        /**
-         * CaptureTraceRequest
-         * @description Represents a request to capture a trace.
-         *
-         *     Attributes:
-         *         type (Literal[IngestionType.CaptureTrace]): The type of ingestion, set to IngestionType.CaptureTrace.
-         *         body (CaptureTraceBody): The body of the capture trace request.
-         */
-        CaptureTraceRequest: {
-            /**
-             * Type
-             * @default capture-trace
-             * @constant
-             * @enum {string}
-             */
-            type: "capture-trace";
-            body: components["schemas"]["CaptureTraceBody"];
-        };
-        /**
-         * CaptureTrackEventBody
-         * @description Represents the body of a capture track event.
-         *
-         *     Attributes:
-         *         name (str): The name of the record. Optional.
-         *         properties (Optional[Dict[str, Any]]): Additional properties associated with the record. Optional.
-         */
-        CaptureTrackEventBody: {
-            /**
-             * Session Id
-             * @description The unique identifier for the record.
-             */
-            session_id: string;
-            /**
-             * Record Id
-             * @description The unique identifier for the record. Optional.
-             */
-            record_id?: string | null;
-            /**
-             * Created At
-             * @description The datetime when the record was captured. Optional.
-             */
-            created_at?: string | null;
-            /**
-             * Metadata
-             * @description Additional metadata associated with the record. Optional.
-             */
-            metadata?: Record<string, never> | null;
-            /**
-             * Ref Record Id
-             * @description The record ID to reference. Optional.
-             */
-            ref_record_id?: string | null;
-            /**
-             * Name
-             * @description The name of the record. Optional.
-             */
-            name: string;
-            /**
-             * Properties
-             * @description Additional properties associated with the record. Optional.
-             */
-            properties?: Record<string, never> | null;
-        };
-        /** HTTPValidationError */
-        HTTPValidationError: {
-            /** Detail */
-            detail?: components["schemas"]["ValidationError"][];
-        };
-        /**
-         * IdentifyUserBody
-         * @description Represents the body of a request to identify a user.
-         *
-         *     Attributes:
-         *         user_id (str): The unique identifier for the user.
-         *         properties (Dict[str, Any], optional): Additional properties associated with the track event. Optional.
-         *         created_at (Optional[str], optional): The datetime when the User is identified. Optional.
-         */
-        IdentifyUserBody: {
-            /**
-             * User Id
-             * @description The unique identifier for the user.
-             */
-            user_id: string;
-            /**
-             * Properties
-             * @description Additional properties associated with the track event. Optional.
-             */
-            properties: Record<string, never>;
-            /**
-             * Created At
-             * @description The datetime when the User is identified. Optional.
-             */
-            created_at?: string | null;
-        };
-        /**
          * CaptureSessionBody
          * @description Represents the request body for capturing a session.
          *
@@ -438,7 +239,7 @@ export interface components {
              * User Id
              * @description The unique identifier for the user.
              */
-            user_id: string;
+            user_id?: string | null;
             /**
              * Session Id
              * @description The unique identifier for the session data.
@@ -475,6 +276,232 @@ export interface components {
             type: "capture-session";
             body: components["schemas"]["CaptureSessionBody"];
         };
+        /**
+         * CaptureSpanBody
+         * @description Represents the body of a capture span observation.
+         *
+         *     Attributes:
+         *         inputs (Optional[Dict[str, Any]]): The inputs of the generation. Optional.
+         *         outputs (Optional[Dict[str, Any]]): The outputs of the generation. Optional.
+         */
+        CaptureSpanBody: {
+            /**
+             * Created At
+             * @description The datetime when the observation was captured. Optional.
+             */
+            created_at?: string | null;
+            /** Name */
+            name: string;
+            /**
+             * Parent Observation Id
+             * @description The parent observation ID. Optional.
+             */
+            parent_observation_id?: string | null;
+            /**
+             * Observation Id
+             * @description The unique identifier for the observation. Optional.
+             */
+            observation_id?: string | null;
+            /** Record Id */
+            record_id?: string | null;
+            /**
+             * Inputs
+             * @description The inputs of the generation. Optional.
+             */
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Outputs
+             * @description The outputs of the generation. Optional.
+             */
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
+         * CaptureSpanRequest
+         * @description Represents a request to capture a span.
+         *
+         *     Attributes:
+         *         type (Literal[IngestionType.CaptureSpan]): The type of ingestion, set to IngestionType.CaptureSpan.
+         *         body (CaptureSpanBody): The body of the capture span request.
+         */
+        CaptureSpanRequest: {
+            /**
+             * Type
+             * @default capture-span
+             * @constant
+             * @enum {string}
+             */
+            type: "capture-span";
+            body: components["schemas"]["CaptureSpanBody"];
+        };
+        /**
+         * CaptureTraceBody
+         * @description Represents the body of a capture trace record.
+         *
+         *     Attributes:
+         *         name (str): The name of the record. Optional.
+         */
+        CaptureTraceBody: {
+            /**
+             * Record Id
+             * @description The unique identifier for the record. Optional.
+             */
+            record_id?: string | null;
+            /**
+             * Created At
+             * @description The datetime when the record was captured. Optional.
+             */
+            created_at?: string | null;
+            /**
+             * Metadata
+             * @description Additional metadata associated with the record. Optional.
+             */
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Ref Record Id
+             * @description The record ID to reference. Optional.
+             */
+            ref_record_id?: string | null;
+            /** Session Id */
+            session_id: string;
+            /**
+             * Name
+             * @description The name of the record. Optional.
+             */
+            name: string;
+            /**
+             * Inputs
+             * @description The inputs of the trace. Optional.
+             */
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Outputs
+             * @description The outputs of the outputs. Optional.
+             */
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
+         * CaptureTraceRequest
+         * @description Represents a request to capture a trace.
+         *
+         *     Attributes:
+         *         type (Literal[IngestionType.CaptureTrace]): The type of ingestion, set to IngestionType.CaptureTrace.
+         *         body (CaptureTraceBody): The body of the capture trace request.
+         */
+        CaptureTraceRequest: {
+            /**
+             * Type
+             * @default capture-trace
+             * @constant
+             * @enum {string}
+             */
+            type: "capture-trace";
+            body: components["schemas"]["CaptureTraceBody"];
+        };
+        /**
+         * CaptureTrackEventBody
+         * @description Represents the body of a capture track event.
+         *
+         *     Attributes:
+         *         name (str): The name of the record. Optional.
+         *         properties (Optional[Dict[str, Any]]): Additional properties associated with the record. Optional.
+         */
+        CaptureTrackEventBody: {
+            /**
+             * Record Id
+             * @description The unique identifier for the record. Optional.
+             */
+            record_id?: string | null;
+            /**
+             * Created At
+             * @description The datetime when the record was captured. Optional.
+             */
+            created_at?: string | null;
+            /**
+             * Metadata
+             * @description Additional metadata associated with the record. Optional.
+             */
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Ref Record Id
+             * @description The record ID to reference. Optional.
+             */
+            ref_record_id?: string | null;
+            /** Session Id */
+            session_id: string;
+            /**
+             * Name
+             * @description The name of the record. Optional.
+             */
+            name: string;
+            /**
+             * Properties
+             * @description Additional properties associated with the record. Optional.
+             */
+            properties?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /**
+         * IdentifyUserRequest
+         * @description Represents a request to identify a user.
+         *
+         *     Attributes:
+         *         type (Literal[IngestionType.IdentifyUser]): The type of ingestion, which is set to IngestionType.IdentifyUser.
+         *         body (IdentifyUserBody): The body of the identification request.
+         */
+        IdentifyUserRequest: {
+            /**
+             * Type
+             * @default identify-user
+             * @constant
+             * @enum {string}
+             */
+            type: "identify-user";
+            body: components["schemas"]["IdentifyUserBody"];
+        };
+        /**
+         * IdentifyUserBody
+         * @description Represents the body of a request to identify a user.
+         *
+         *     Attributes:
+         *         user_id (str): The unique identifier for the user.
+         *         properties (Dict[str, Any], optional): Additional properties associated with the track event. Optional.
+         *         created_at (Optional[str], optional): The datetime when the User is identified. Optional.
+         */
+        IdentifyUserBody: {
+            /**
+             * User Id
+             * @description The unique identifier for the user.
+             */
+            user_id: string;
+            /**
+             * Properties
+             * @description Additional properties associated with the track event. Optional.
+             */
+            properties: Record<string, never>;
+            /**
+             * Created At
+             * @description The datetime when the User is identified. Optional.
+             */
+            created_at?: string | null;
+        };
+        /** HTTPValidationError */
+        HTTPValidationError: {
+            /** Detail */
+            detail?: components["schemas"]["ValidationError"][];
+        };
         /** ValidationError */
         ValidationError: {
             /** Location */
@@ -502,94 +529,9 @@ export interface components {
             type: "capture-track-event";
             body: components["schemas"]["CaptureTrackEventBody"];
         };
-        /** UpdateTraceBody */
-        UpdateTraceBody: {
-            /**
-             * Session Id
-             * @description The unique identifier for the record.
-             */
-            session_id?: string | null;
-            /** Record Id */
-            record_id: string;
-            /**
-             * Created At
-             * @description The datetime when the record was captured. Optional.
-             */
-            created_at?: string | null;
-            /**
-             * Metadata
-             * @description Additional metadata associated with the record. Optional.
-             */
-            metadata?: Record<string, never> | null;
-            /**
-             * Ref Record Id
-             * @description The record ID to reference. Optional.
-             */
-            ref_record_id?: string | null;
-            /** Ended At */
-            ended_at: string | null;
-        };
-        /** UpdateTraceRequest */
-        UpdateTraceRequest: {
-            /**
-             * Type
-             * @default update-trace
-             * @constant
-             * @enum {string}
-             */
-            type: "update-trace";
-            body: components["schemas"]["UpdateTraceBody"];
-        };
-        /** UpdateSpanBody */
-        UpdateSpanBody: {
-            /**
-             * Record Id
-             * @description The unique identifier for the record.
-             */
-            record_id?: string | null;
-            /**
-             * Created At
-             * @description The datetime when the observation was captured. Optional.
-             */
-            created_at?: string | null;
-            /**
-             * Name
-             * @description The name of the observation. Optional.
-             */
-            name: string;
-            /**
-             * Parent Observation Id
-             * @description The parent observation ID. Optional.
-             */
-            parent_observation_id?: string | null;
-            /** Observation Id */
-            observation_id: string;
-            /** Ended At */
-            ended_at: string | null;
-            /** Inputs */
-            inputs: Record<string, never> | null;
-            /** Outputs */
-            outputs: Record<string, never> | null;
-        };
-        /** UpdateSpanRequest */
-        UpdateSpanRequest: {
-            /**
-             * Type
-             * @default update-span
-             * @constant
-             * @enum {string}
-             */
-            type: "update-span";
-            body: components["schemas"]["UpdateSpanBody"];
-        };
         /** UpdateGenerationBody */
         UpdateGenerationBody: {
             /**
-             * Record Id
-             * @description The unique identifier for the record.
-             */
-            record_id?: string | null;
-            /**
              * Created At
              * @description The datetime when the observation was captured. Optional.
              */
@@ -598,7 +540,7 @@ export interface components {
              * Name
              * @description The name of the observation. Optional.
              */
-            name: string;
+            name?: string | null;
             /**
              * Parent Observation Id
              * @description The parent observation ID. Optional.
@@ -607,11 +549,15 @@ export interface components {
             /** Observation Id */
             observation_id: string;
             /** Ended At */
-            ended_at: string | null;
+            ended_at?: string | null;
             /** Inputs */
-            inputs: Record<string, never> | null;
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
             /** Outputs */
-            outputs: Record<string, never> | null;
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
         };
         /** UpdateGenerationRequest */
         UpdateGenerationRequest: {
@@ -624,23 +570,89 @@ export interface components {
             type: "update-generation";
             body: components["schemas"]["UpdateGenerationBody"];
         };
-        /**
-         * IdentifyUserRequest
-         * @description Represents a request to identify a user.
-         *
-         *     Attributes:
-         *         type (Literal[IngestionType.IdentifyUser]): The type of ingestion, which is set to IngestionType.IdentifyUser.
-         *         body (IdentifyUserBody): The body of the identification request.
-         */
-        IdentifyUserRequest: {
+        /** UpdateSpanBody */
+        UpdateSpanBody: {
+            /**
+             * Created At
+             * @description The datetime when the observation was captured. Optional.
+             */
+            created_at?: string | null;
+            /**
+             * Name
+             * @description The name of the observation. Optional.
+             */
+            name?: string | null;
+            /**
+             * Parent Observation Id
+             * @description The parent observation ID. Optional.
+             */
+            parent_observation_id?: string | null;
+            /** Observation Id */
+            observation_id: string;
+            /** Ended At */
+            ended_at?: string | null;
+            /** Inputs */
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
+            /** Outputs */
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** UpdateSpanRequest */
+        UpdateSpanRequest: {
             /**
              * Type
-             * @default identify-user
+             * @default update-span
              * @constant
              * @enum {string}
              */
-            type: "identify-user";
-            body: components["schemas"]["IdentifyUserBody"];
+            type: "update-span";
+            body: components["schemas"]["UpdateSpanBody"];
+        };
+        /** UpdateTraceBody */
+        UpdateTraceBody: {
+            /** Record Id */
+            record_id: string;
+            /**
+             * Created At
+             * @description The datetime when the record was captured. Optional.
+             */
+            created_at?: string | null;
+            /**
+             * Metadata
+             * @description Additional metadata associated with the record. Optional.
+             */
+            metadata?: {
+                [key: string]: unknown;
+            } | null;
+            /**
+             * Ref Record Id
+             * @description The record ID to reference. Optional.
+             */
+            ref_record_id?: string | null;
+            /** Ended At */
+            ended_at?: string | null;
+            /** Inputs */
+            inputs?: {
+                [key: string]: unknown;
+            } | null;
+            /** Outputs */
+            outputs?: {
+                [key: string]: unknown;
+            } | null;
+        };
+        /** UpdateTraceRequest */
+        UpdateTraceRequest: {
+            /**
+             * Type
+             * @default update-trace
+             * @constant
+             * @enum {string}
+             */
+            type: "update-trace";
+            body: components["schemas"]["UpdateTraceBody"];
         };
     };
     responses: never;

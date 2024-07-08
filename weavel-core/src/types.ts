@@ -1,6 +1,6 @@
-import { type components, type paths } from "./openapi/server";
+import { type components, type paths } from './openapi/server';
 
-export type WeavelCoreOptions = {
+export type WeavelOptions = {
   // Weavel API key obtained from the dashboard project settings
   apiKey?: string;
   // Weavel API baseUrl (https://api.weavel.ai by default)
@@ -24,13 +24,13 @@ export type WeavelCoreOptions = {
 };
 
 export enum WeavelPersistedProperty {
-  Props = "props",
-  Queue = "queue",
-  OptedOut = "opted_out",
+  Props = 'props',
+  Queue = 'queue',
+  OptedOut = 'opted_out',
 }
 
 export type WeavelFetchOptions = {
-  method: "GET" | "POST" | "PUT" | "PATCH";
+  method: 'GET' | 'POST' | 'PUT' | 'PATCH';
   headers: { [key: string]: string };
   body?: string;
   signal?: AbortSignal;
@@ -42,48 +42,84 @@ export type WeavelFetchResponse<T = any> = {
   json: () => Promise<T>;
 };
 
-export type IngestionType = SingleIngestionEvent["type"];
+export type IngestionType = SingleIngestionEvent['type'];
 
 export type WeavelQueueItem = SingleIngestionEvent & {
   callback?: (err: any) => void;
 };
 
 export type SingleIngestionEvent =
-  paths["/public/v2/batch"]["post"]["requestBody"]["content"]["application/json"]["batch"][number];
+  paths['/public/v2/batch']['post']['requestBody']['content']['application/json']['batch'][number];
 
 // ASYNC
-export type BatchRequestBody = FixTypes<components["schemas"]["BatchRequestBody"]>;
+export type BatchRequestBody = FixTypes<
+  components['schemas']['BatchRequestBody']
+>;
 
-export type IdentifyUserBody = FixTypes<components["schemas"]["IdentifyUserBody"]>;
-export type CaptureSessionBody = FixTypes<components["schemas"]["CaptureSessionBody"]>;
+export type IdentifyUserBody = FixTypes<
+  components['schemas']['IdentifyUserBody']
+>;
+export type CaptureSessionBody = FixTypes<
+  components['schemas']['CaptureSessionBody']
+>;
 
-export type CaptureMessageBody = FixTypes<components["schemas"]["CaptureMessageBody"]>;
-export type CaptureTrackEventBody = FixTypes<components["schemas"]["CaptureTrackEventBody"]>;
-export type CaptureTraceBody = FixTypes<components["schemas"]["CaptureTraceBody"]>;
+export type CaptureMessageBody = FixTypes<
+  components['schemas']['CaptureMessageBody']
+>;
+export type CaptureTrackEventBody = FixTypes<
+  components['schemas']['CaptureTrackEventBody']
+>;
+export type CaptureTraceBody = FixTypes<
+  components['schemas']['CaptureTraceBody']
+>;
 
-export type CaptureSpanBody = FixTypes<components["schemas"]["CaptureSpanBody"]>;
-export type CaptureLogBody = FixTypes<components["schemas"]["CaptureLogBody"]>;
-export type CaptureGenerationBody = FixTypes<components["schemas"]["CaptureGenerationBody"]>;
+export type CaptureSpanBody = FixTypes<
+  components['schemas']['CaptureSpanBody']
+>;
+export type CaptureLogBody = FixTypes<components['schemas']['CaptureLogBody']>;
+export type CaptureGenerationBody = FixTypes<
+  components['schemas']['CaptureGenerationBody']
+>;
 
-export type UpdateTraceBody = FixTypes<components["schemas"]["UpdateTraceBody"]>;
-export type UpdateSpanBody = FixTypes<components["schemas"]["UpdateSpanBody"]>;
-export type UpdateGenerationBody = FixTypes<components["schemas"]["UpdateGenerationBody"]>;
+export type UpdateTraceBody = FixTypes<
+  components['schemas']['UpdateTraceBody']
+>;
+export type UpdateSpanBody = FixTypes<components['schemas']['UpdateSpanBody']>;
+export type UpdateGenerationBody = FixTypes<
+  components['schemas']['UpdateGenerationBody']
+>;
 
-
-export type JsonType = string | number | boolean | null | { [key: string]: JsonType } | Array<JsonType>;
+export type JsonType =
+  | string
+  | number
+  | boolean
+  | null
+  | { [key: string]: JsonType }
+  | Array<JsonType>;
 
 type OptionalTypes<T> = T extends null | undefined ? T : never;
 type FixTypes<T> = Omit<
   {
-    [P in keyof T]: P extends "startTime" | "endTime" | "timestamp" | "completionStartTime" | "createdAt" | "updatedAt"
+    [P in keyof T]: P extends
+      | 'startTime'
+      | 'endTime'
+      | 'timestamp'
+      | 'completionStartTime'
+      | 'createdAt'
+      | 'updatedAt'
       ? // Dates instead of strings
         Date | OptionalTypes<T[P]>
-      : P extends "metadata" | "input" | "output" | "completion" | "expectedOutput"
+      : P extends
+            | 'metadata'
+            | 'input'
+            | 'output'
+            | 'completion'
+            | 'expectedOutput'
         ? // JSON instead of strings
           any | OptionalTypes<T[P]>
         : T[P];
   },
-  "externalId" | "traceIdType"
+  'externalId' | 'traceIdType'
 >;
 
 export type DeferRuntime = {

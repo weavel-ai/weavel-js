@@ -9,7 +9,7 @@ import {
   type WeavelFetchOptions,
   type WeavelFetchResponse,
   type WeavelQueueItem,
-  type WeavelCoreOptions,
+  type WeavelOptions,
   type IngestionType,
   WeavelPersistedProperty,
   type CaptureTraceBody,
@@ -66,7 +66,7 @@ function isWeavelFetchError(err: any): boolean {
   );
 }
 
-abstract class WeavelCoreStateless {
+abstract class WeavelWorker {
   // options
   private apiKey: string;
   baseUrl: string;
@@ -81,7 +81,7 @@ abstract class WeavelCoreStateless {
   private enabled: boolean;
 
   // internal
-  protected _options: WeavelCoreOptions;
+  protected _options: WeavelOptions;
   protected _events = new SimpleEventEmitter();
   protected _flushTimer?: any;
   protected _retryOptions: RetriableOptions;
@@ -101,7 +101,7 @@ abstract class WeavelCoreStateless {
     value: T | null
   ): void;
 
-  constructor(params: WeavelCoreOptions) {
+  constructor(params: WeavelOptions) {
     this._options = params;
     const { apiKey, enabled, ...options } = params;
 
@@ -559,8 +559,8 @@ abstract class WeavelCoreStateless {
   }
 }
 
-export abstract class WeavelWebStateless extends WeavelCoreStateless {
-  constructor(params: WeavelCoreOptions) {
+export abstract class WeavelWebWorker extends WeavelWorker {
+  constructor(params: WeavelOptions) {
     const { flushAt, flushInterval, apiKey, enabled, ...rest } = params;
     let isObservabilityEnabled = enabled === false ? false : true;
 
@@ -608,32 +608,226 @@ export abstract class WeavelWebStateless extends WeavelCoreStateless {
     await this.awaitAllQueuedAndPendingRequests();
     return this;
   }
+
+  async trace(body: CaptureTraceBody): Promise<WeavelWebTraceClient> {
+    const id = this.traceStateless(body);
+    const t = new WeavelWebTraceClient(this, id);
+    await this.awaitAllQueuedAndPendingRequests();
+    return t;
+  }
+
+  async _span(body: CaptureSpanBody): Promise<WeavelWebSpanClient> {
+    const id = this.spanStateless(body);
+    const s = new WeavelWebSpanClient(this, id, body.record_id);
+    await this.awaitAllQueuedAndPendingRequests();
+    return s;
+  }
+
+  async _log(body: CaptureLogBody): Promise<this> {
+    this.logStateless(body);
+    await this.awaitAllQueuedAndPendingRequests();
+    return this;
+  }
+
+  async _generation(
+    body: CaptureGenerationBody
+  ): Promise<WeavelWebGenerationClient> {
+    const id = this.generationStateless(body);
+    const g = new WeavelWebGenerationClient(this, id, body.record_id);
+    await this.awaitAllQueuedAndPendingRequests();
+    return g;
+  }
+
+  async _updateTrace(body: UpdateTraceBody): Promise<this> {
+    this.updateTraceStateless(body);
+    await this.awaitAllQueuedAndPendingRequests();
+    return this;
+  }
+
+  async _updateSpan(body: UpdateSpanBody): Promise<this> {
+    this.updateSpanStateless(body);
+    await this.awaitAllQueuedAndPendingRequests();
+    return this;
+  }
+
+  async _updateGeneration(body: UpdateGenerationBody): Promise<this> {
+    this.updateGenerationStateless(body);
+    await this.awaitAllQueuedAndPendingRequests();
+    return this;
+  }
 }
 
 export class WeavelWebSessionClient {
-  public readonly client: WeavelWebStateless;
+  public readonly client: WeavelWebWorker;
   public readonly id: string; // id of item itself
 
-  constructor(client: WeavelWebStateless, id: string) {
+  constructor(client: WeavelWebWorker, id: string) {
     this.client = client;
     this.id = id;
   }
 
   async track(
     body: Omit<CaptureTrackEventBody, 'session_id'>
-  ): Promise<WeavelWebStateless> {
-    return this.client.track({ session_id: this.id, ...body });
+  ): Promise<WeavelWebWorker> {
+    return await this.client.track({ session_id: this.id, ...body });
   }
 
   async message(
     body: Omit<CaptureMessageBody, 'session_id'>
-  ): Promise<WeavelWebStateless> {
-    return this.client.message({ session_id: this.id, ...body });
+  ): Promise<WeavelWebWorker> {
+    return await this.client.message({ session_id: this.id, ...body });
+  }
+
+  async span(body: CaptureSpanBody): Promise<WeavelWebSpanClient> {
+    return await this.client._span(body);
+  }
+
+  async log(body: CaptureLogBody): Promise<WeavelWebWorker> {
+    return await this.client._log(body);
+  }
+
+  async generation(
+    body: CaptureGenerationBody
+  ): Promise<WeavelWebGenerationClient> {
+    return await this.client._generation(body);
   }
 }
 
-export abstract class WeavelCore extends WeavelCoreStateless {
-  constructor(params: WeavelCoreOptions) {
+export abstract class WeavelWebObjectClient {
+  public readonly client: WeavelWebWorker;
+  public readonly id: string; // id of item itself
+  public readonly recordId: string | null | undefined; // id of trace, if traceClient this is the same as id
+  public readonly observationId: string | null; // id of observation, if observationClient this is the same as id, if traceClient this is null
+
+  constructor({
+    client,
+    id,
+    recordId,
+    observationId,
+  }: {
+    client: WeavelWebWorker;
+    id: string;
+    recordId?: string | null;
+    observationId: string | null;
+  }) {
+    this.client = client;
+    this.id = id;
+    this.recordId = recordId ?? null;
+    this.observationId = observationId;
+  }
+
+  async span(
+    body: Omit<CaptureSpanBody, 'record_id' | 'parent_observation_id'>
+  ): Promise<WeavelWebSpanClient> {
+    return await this.client._span({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
+  }
+
+  async log(
+    body: Omit<CaptureLogBody, 'record_id' | 'parent_observation_id'>
+  ): Promise<WeavelWebWorker> {
+    return await this.client._log({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
+  }
+
+  async generation(
+    body: Omit<CaptureGenerationBody, 'record_id' | 'parent_observation_id'>
+  ): Promise<WeavelWebGenerationClient> {
+    return await this.client._generation({
+      ...body,
+      record_id: this.recordId,
+      parent_observation_id: this.observationId,
+    });
+  }
+}
+
+export class WeavelWebTraceClient extends WeavelWebObjectClient {
+  constructor(client: WeavelWebWorker, recordId: string) {
+    super({ client, id: recordId, recordId, observationId: null });
+  }
+
+  async update(body: Omit<UpdateTraceBody, 'record_id'>): Promise<this> {
+    await this.client._updateTrace({
+      ...body,
+      record_id: this.id,
+    });
+    return this;
+  }
+
+  async end(
+    body?: Omit<UpdateTraceBody, 'record_id' | 'ended_at'>
+  ): Promise<this> {
+    await this.client._updateTrace({
+      ...body,
+      record_id: this.id,
+      ended_at: new Date().toISOString(),
+    });
+    return this;
+  }
+}
+
+export class WeavelWebSpanClient extends WeavelWebObjectClient {
+  constructor(client: WeavelWebWorker, id: string, recordId?: string | null) {
+    super({ client, id, recordId, observationId: id });
+  }
+
+  async update(
+    body: Omit<UpdateSpanBody, 'observation_id' | 'record_id'>
+  ): Promise<this> {
+    await this.client._updateSpan({
+      ...body,
+      observation_id: this.id,
+    });
+    return this;
+  }
+
+  async end(): Promise<this> {
+    await this.client._updateSpan({
+      observation_id: this.id,
+      ended_at: new Date().toISOString(),
+    });
+    return this;
+  }
+}
+
+export class WeavelWebGenerationClient {
+  public readonly client: WeavelWebWorker;
+  public readonly id: string; // id of generation
+  public readonly recordId: string | null | undefined; // id of trace record
+
+  constructor(client: WeavelWebWorker, id: string, recordId?: string | null) {
+    this.client = client;
+    this.id = id;
+    this.recordId = recordId ?? null;
+  }
+
+  async update(
+    body: Omit<UpdateGenerationBody, 'observation_id' | 'record_id'>
+  ): Promise<this> {
+    await this.client._updateGeneration({
+      ...body,
+      observation_id: this.id,
+    });
+    return this;
+  }
+
+  async end(): Promise<this> {
+    await this.client._updateGeneration({
+      observation_id: this.id,
+      ended_at: new Date().toISOString(),
+    });
+    return this;
+  }
+}
+
+export abstract class WeavelCoreWorker extends WeavelWorker {
+  constructor(params: WeavelOptions) {
     const { apiKey, enabled } = params;
     let isObservabilityEnabled = enabled === false ? false : true;
 
@@ -662,23 +856,28 @@ export abstract class WeavelCore extends WeavelCoreStateless {
     return s;
   }
 
+  track(body: CaptureTrackEventBody): this {
+    this.trackEventStateless(body);
+    return this;
+  }
+
   trace(body: CaptureTraceBody): WeavelTraceClient {
     const id = this.traceStateless(body);
     const t = new WeavelTraceClient(this, id);
     return t;
   }
 
-  span(body: CaptureSpanBody): WeavelSpanClient {
+  _span(body: CaptureSpanBody): WeavelSpanClient {
     const id = this.spanStateless(body);
     return new WeavelSpanClient(this, id, body.record_id);
   }
 
-  generation(body: CaptureGenerationBody): WeavelGenerationClient {
+  _generation(body: CaptureGenerationBody): WeavelGenerationClient {
     const id = this.generationStateless(body);
     return new WeavelGenerationClient(this, id, body.record_id);
   }
 
-  log(body: CaptureLogBody): this {
+  _log(body: CaptureLogBody): this {
     this.logStateless(body);
     return this;
   }
@@ -700,10 +899,10 @@ export abstract class WeavelCore extends WeavelCoreStateless {
 }
 
 export class WeavelSessionClient {
-  public readonly client: WeavelCore;
+  public readonly client: WeavelCoreWorker;
   public readonly id: string; // id of item itself
 
-  constructor(client: WeavelCore, id: string) {
+  constructor(client: WeavelCoreWorker, id: string) {
     this.client = client;
     this.id = id;
   }
@@ -713,22 +912,22 @@ export class WeavelSessionClient {
   }
 
   span(body: CaptureSpanBody): WeavelSpanClient {
-    return this.client.span(body);
+    return this.client._span(body);
   }
 
   generation(body: CaptureGenerationBody): WeavelGenerationClient {
-    return this.client.generation(body);
+    return this.client._generation(body);
   }
 
-  log(body: CaptureLogBody): WeavelCore {
-    return this.client.log(body);
+  log(body: CaptureLogBody): WeavelCoreWorker {
+    return this.client._log(body);
   }
 }
 
 export abstract class WeavelObjectClient {
-  public readonly client: WeavelCore;
+  public readonly client: WeavelCoreWorker;
   public readonly id: string; // id of item itself
-  public readonly recordId: string; // id of trace, if traceClient this is the same as id
+  public readonly recordId?: string | null; // id of trace, if traceClient this is the same as id
   public readonly observationId: string | null; // id of observation, if observationClient this is the same as id, if traceClient this is null
 
   constructor({
@@ -737,21 +936,21 @@ export abstract class WeavelObjectClient {
     recordId,
     observationId,
   }: {
-    client: WeavelCore;
+    client: WeavelCoreWorker;
     id: string;
-    recordId: string;
+    recordId?: string | null;
     observationId: string | null;
   }) {
     this.client = client;
     this.id = id;
-    this.recordId = recordId;
+    this.recordId = recordId ?? null;
     this.observationId = observationId;
   }
 
   span(
     body: Omit<CaptureSpanBody, 'record_id' | 'parent_observation_id'>
   ): WeavelSpanClient {
-    return this.client.span({
+    return this.client._span({
       ...body,
       record_id: this.recordId,
       parent_observation_id: this.observationId,
@@ -760,8 +959,8 @@ export abstract class WeavelObjectClient {
 
   log(
     body: Omit<CaptureLogBody, 'record_id' | 'parent_observation_id'>
-  ): WeavelCore {
-    return this.client.log({
+  ): WeavelCoreWorker {
+    return this.client._log({
       ...body,
       record_id: this.recordId,
       parent_observation_id: this.observationId,
@@ -771,7 +970,7 @@ export abstract class WeavelObjectClient {
   generation(
     body: Omit<CaptureGenerationBody, 'record_id' | 'parent_observation_id'>
   ): WeavelGenerationClient {
-    return this.client.generation({
+    return this.client._generation({
       ...body,
       record_id: this.recordId,
       parent_observation_id: this.observationId,
@@ -780,7 +979,7 @@ export abstract class WeavelObjectClient {
 }
 
 export class WeavelTraceClient extends WeavelObjectClient {
-  constructor(client: WeavelCore, recordId: string) {
+  constructor(client: WeavelCoreWorker, recordId: string) {
     super({ client, id: recordId, recordId, observationId: null });
   }
 
@@ -803,23 +1002,20 @@ export class WeavelTraceClient extends WeavelObjectClient {
 }
 
 export class WeavelSpanClient extends WeavelObjectClient {
-  constructor(client: WeavelCore, id: string, recordId: string) {
+  constructor(client: WeavelCoreWorker, id: string, recordId?: string | null) {
     super({ client, id, recordId, observationId: id });
   }
 
   update(body: Omit<UpdateSpanBody, 'observation_id' | 'record_id'>): this {
     this.client._updateSpan({
       ...body,
-      record_id: this.recordId,
       observation_id: this.id,
     });
     return this;
   }
 
-  end(body: Omit<UpdateSpanBody, 'observation_id' | 'ended_at'>): this {
+  end(): this {
     this.client._updateSpan({
-      ...body,
-      record_id: this.recordId,
       observation_id: this.id,
       ended_at: new Date().toISOString(),
     });
@@ -828,14 +1024,14 @@ export class WeavelSpanClient extends WeavelObjectClient {
 }
 
 export class WeavelGenerationClient {
-  public readonly client: WeavelCore;
+  public readonly client: WeavelCoreWorker;
   public readonly id: string; // id of generation
-  public readonly recordId: string; // id of trace
+  public readonly recordId?: string | null; // id of trace record
 
-  constructor(client: WeavelCore, id: string, recordId: string) {
+  constructor(client: WeavelCoreWorker, id: string, recordId?: string | null) {
     this.client = client;
     this.id = id;
-    this.recordId = recordId;
+    this.recordId = recordId ?? null;
   }
 
   update(
@@ -843,16 +1039,13 @@ export class WeavelGenerationClient {
   ): this {
     this.client._updateGeneration({
       ...body,
-      record_id: this.recordId,
       observation_id: this.id,
     });
     return this;
   }
 
-  end(body: Omit<UpdateGenerationBody, 'observation_id' | 'ended_at'>): this {
+  end(): this {
     this.client._updateGeneration({
-      ...body,
-      record_id: this.recordId,
       observation_id: this.id,
       ended_at: new Date().toISOString(),
     });

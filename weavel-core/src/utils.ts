@@ -1,4 +1,4 @@
-import { type WeavelCoreOptions } from "./types";
+import { type WeavelOptions } from './types';
 
 export function assert(truthyValue: any, message: string): void {
   if (!truthyValue) {
@@ -7,14 +7,14 @@ export function assert(truthyValue: any, message: string): void {
 }
 
 export function removeTrailingSlash(url: string): string {
-  return url?.replace(/\/+$/, "");
+  return url?.replace(/\/+$/, '');
 }
 
 export type RetriableOptions = {
   retryCount?: number;
   retryDelay?: number;
   retryCheck?: (err: any) => boolean;
-}
+};
 
 export async function retriable<T>(
   fn: () => Promise<T>,
@@ -51,8 +51,12 @@ export function generateUUID(globalThis?: any): string {
   // Public Domain/MIT
   let d = new Date().getTime(); //Timestamp
   let d2 =
-    (globalThis && globalThis.performance && globalThis.performance.now && globalThis.performance.now() * 1000) || 0; //Time in microseconds since page-load or 0 if unsupported
-  return "xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx".replace(/[xy]/g, function (c) {
+    (globalThis &&
+      globalThis.performance &&
+      globalThis.performance.now &&
+      globalThis.performance.now() * 1000) ||
+    0; //Time in microseconds since page-load or 0 if unsupported
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
     let r = Math.random() * 16; //random number between 0 and 16
     if (d > 0) {
       //Use timestamp until depleted
@@ -63,7 +67,7 @@ export function generateUUID(globalThis?: any): string {
       r = (d2 + r) % 16 | 0;
       d2 = Math.floor(d2 / 16);
     }
-    return (c === "x" ? r : (r & 0x3) | 0x8).toString(16);
+    return (c === 'x' ? r : (r & 0x3) | 0x8).toString(16);
   });
 }
 
@@ -85,20 +89,20 @@ export function safeSetTimeout(fn: () => void, timeout: number): any {
 }
 
 export function getEnv<T = string>(key: string): T | undefined {
-  if (typeof process !== "undefined" && process.env[key]) {
+  if (typeof process !== 'undefined' && process.env[key]) {
     return process.env[key] as T;
-  } else if (typeof globalThis !== "undefined") {
+  } else if (typeof globalThis !== 'undefined') {
     return (globalThis as any)[key];
   }
   return;
 }
 
-export function configWeavelSDK(params?: WeavelCoreOptions): WeavelCoreOptions {
+export function configWeavelSDK(params?: WeavelOptions): WeavelOptions {
   const { apiKey, ...coreOptions } = params ?? {};
 
   // check environment variables if values not provided
-  const finalAPIKey = apiKey ?? getEnv("WEAVEL_PUBLIC_KEY");
-  const finalBaseUrl = coreOptions.baseUrl ?? getEnv("WEAVEL_BASEURL");
+  const finalAPIKey = apiKey ?? getEnv('WEAVEL_PUBLIC_KEY');
+  const finalBaseUrl = coreOptions.baseUrl ?? getEnv('WEAVEL_BASEURL');
 
   const finalCoreOptions = {
     ...coreOptions,

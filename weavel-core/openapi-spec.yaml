@@ -10,7 +10,14 @@ paths:
         - Public V2
         - Batch
       summary: Capture Batch
-      description: Batch Execution of POST APIs
+      description: |-
+        Capture a batch of tasks and save them in the database for processing.
+
+        Args:
+            body (BatchRequestBody): The request body containing the batch of tasks.
+
+        Returns:
+            Response: The HTTP response with status code 200.
       operationId: capture_batch_public_v2_batch_post
       requestBody:
         content:
@@ -67,10 +74,6 @@ components:
                 The list of requests to be processed in the batch.
     CaptureGenerationBody:
       properties:
-        record_id:
-          type: string
-          title: Record Id
-          description: The unique identifier for the record.
         created_at:
           anyOf:
             - type: string
@@ -80,7 +83,6 @@ components:
         name:
           type: string
           title: Name
-          description: The name of the observation. Optional.
         parent_observation_id:
           anyOf:
             - type: string
@@ -93,21 +95,27 @@ components:
             - type: 'null'
           title: Observation Id
           description: The unique identifier for the observation. Optional.
+        record_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Record Id
         inputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Inputs
           description: The inputs of the generation. Optional.
         outputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Outputs
           description: The outputs of the generation. Optional.
       type: object
       required:
-        - record_id
         - name
       title: CaptureGenerationBody
       description: |-
@@ -139,10 +147,6 @@ components:
             body (CaptureGenerationBody): The body of the capture generation request.
     CaptureLogBody:
       properties:
-        record_id:
-          type: string
-          title: Record Id
-          description: The unique identifier for the record.
         created_at:
           anyOf:
             - type: string
@@ -152,7 +156,6 @@ components:
         name:
           type: string
           title: Name
-          description: The name of the observation. Optional.
         parent_observation_id:
           anyOf:
             - type: string
@@ -165,6 +168,11 @@ components:
             - type: 'null'
           title: Observation Id
           description: The unique identifier for the observation. Optional.
+        record_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Record Id
         value:
           anyOf:
             - type: string
@@ -173,7 +181,6 @@ components:
           description: The value of the observation. Optional.
       type: object
       required:
-        - record_id
         - name
       title: CaptureLogBody
       description: |-
@@ -204,10 +211,6 @@ components:
             body (CaptureLogBody): The body of the capture log request.
     CaptureMessageBody:
       properties:
-        session_id:
-          type: string
-          title: Session Id
-          description: The unique identifier for the record.
         record_id:
           anyOf:
             - type: string
@@ -223,6 +226,7 @@ components:
         metadata:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Metadata
           description: Additional metadata associated with the record. Optional.
@@ -232,6 +236,9 @@ components:
             - type: 'null'
           title: Ref Record Id
           description: The record ID to reference. Optional.
+        session_id:
+          type: string
+          title: Session Id
         role:
           type: string
           enum:
@@ -277,12 +284,67 @@ components:
         Attributes:
             type (Literal[IngestionType.CaptureMessage]): The type of ingestion, which is set to IngestionType.CaptureMessage.
             body (CaptureMessageBody): The body of the capture message request.
+    CaptureSessionBody:
+      properties:
+        user_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: User Id
+          description: The unique identifier for the user.
+        session_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Session Id
+          description: The unique identifier for the session data.
+        metadata:
+          anyOf:
+            - additionalProperties:
+                type: string
+              type: object
+            - type: 'null'
+          title: Metadata
+          description: Additional metadata associated with the session. Optional.
+        created_at:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Created At
+          description: The datetime when the session was opened. Optional.
+      type: object
+      title: CaptureSessionBody
+      description: |-
+        Represents the request body for capturing a session.
+
+        Attributes:
+            user_id (str): The unique identifier for the user.
+            session_id (str): The unique identifier for the session data.
+            metadata (Optional[Dict[str, str]]): Additional metadata associated with the session. Optional.
+            created_at (Optional[str]): The datetime when the session was opened. Optional.
+    CaptureSessionRequest:
+      properties:
+        type:
+          type: string
+          enum:
+            - capture-session
+          const: capture-session
+          title: Type
+          default: capture-session
+        body:
+          $ref: '#/components/schemas/CaptureSessionBody'
+      type: object
+      required:
+        - body
+      title: CaptureSessionRequest
+      description: |-
+        Represents a request to capture a session.
+
+        Attributes:
+            type (Literal[IngestionType.OpenSession]): The type of ingestion, set to IngestionType.OpenSession.
+            body (OpenSessionBody): The body of the open session request.
     CaptureSpanBody:
       properties:
-        record_id:
-          type: string
-          title: Record Id
-          description: The unique identifier for the record.
         created_at:
           anyOf:
             - type: string
@@ -292,7 +354,6 @@ components:
         name:
           type: string
           title: Name
-          description: The name of the observation. Optional.
         parent_observation_id:
           anyOf:
             - type: string
@@ -305,21 +366,27 @@ components:
             - type: 'null'
           title: Observation Id
           description: The unique identifier for the observation. Optional.
+        record_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Record Id
         inputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Inputs
           description: The inputs of the generation. Optional.
         outputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Outputs
           description: The outputs of the generation. Optional.
       type: object
       required:
-        - record_id
         - name
       title: CaptureSpanBody
       description: |-
@@ -351,10 +418,6 @@ components:
             body (CaptureSpanBody): The body of the capture span request.
     CaptureTraceBody:
       properties:
-        session_id:
-          type: string
-          title: Session Id
-          description: The unique identifier for the record.
         record_id:
           anyOf:
             - type: string
@@ -370,6 +433,7 @@ components:
         metadata:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Metadata
           description: Additional metadata associated with the record. Optional.
@@ -379,10 +443,27 @@ components:
             - type: 'null'
           title: Ref Record Id
           description: The record ID to reference. Optional.
+        session_id:
+          type: string
+          title: Session Id
         name:
           type: string
           title: Name
           description: The name of the record. Optional.
+        inputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Inputs
+          description: The inputs of the trace. Optional.
+        outputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Outputs
+          description: The outputs of the outputs. Optional.
       type: object
       required:
         - session_id
@@ -416,10 +497,6 @@ components:
             body (CaptureTraceBody): The body of the capture trace request.
     CaptureTrackEventBody:
       properties:
-        session_id:
-          type: string
-          title: Session Id
-          description: The unique identifier for the record.
         record_id:
           anyOf:
             - type: string
@@ -435,6 +512,7 @@ components:
         metadata:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Metadata
           description: Additional metadata associated with the record. Optional.
@@ -444,6 +522,9 @@ components:
             - type: 'null'
           title: Ref Record Id
           description: The record ID to reference. Optional.
+        session_id:
+          type: string
+          title: Session Id
         name:
           type: string
           title: Name
@@ -451,6 +532,7 @@ components:
         properties:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Properties
           description: Additional properties associated with the record. Optional.
@@ -465,15 +547,27 @@ components:
         Attributes:
             name (str): The name of the record. Optional.
             properties (Optional[Dict[str, Any]]): Additional properties associated with the record. Optional.
-    HTTPValidationError:
+    IdentifyUserRequest:
       properties:
-        detail:
-          items:
-            $ref: '#/components/schemas/ValidationError'
-          type: array
-          title: Detail
+        type:
+          type: string
+          enum:
+            - identify-user
+          const: identify-user
+          title: Type
+          default: identify-user
+        body:
+          $ref: '#/components/schemas/IdentifyUserBody'
       type: object
-      title: HTTPValidationError
+      required:
+        - body
+      title: IdentifyUserRequest
+      description: |-
+        Represents a request to identify a user.
+
+        Attributes:
+            type (Literal[IngestionType.IdentifyUser]): The type of ingestion, which is set to IngestionType.IdentifyUser.
+            body (IdentifyUserBody): The body of the identification request.
     IdentifyUserBody:
       properties:
         user_id:
@@ -502,65 +596,15 @@ components:
             user_id (str): The unique identifier for the user.
             properties (Dict[str, Any], optional): Additional properties associated with the track event. Optional.
             created_at (Optional[str], optional): The datetime when the User is identified. Optional.
-    CaptureSessionBody:
+    HTTPValidationError:
       properties:
-        user_id:
-          type: string
-          title: User Id
-          description: The unique identifier for the user.
-        session_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Session Id
-          description: The unique identifier for the session data.
-        metadata:
-          anyOf:
-            - additionalProperties:
-                type: string
-              type: object
-            - type: 'null'
-          title: Metadata
-          description: Additional metadata associated with the session. Optional.
-        created_at:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Created At
-          description: The datetime when the session was opened. Optional.
+        detail:
+          items:
+            $ref: '#/components/schemas/ValidationError'
+          type: array
+          title: Detail
       type: object
-      required:
-        - user_id
-      title: CaptureSessionBody
-      description: |-
-        Represents the request body for capturing a session.
-
-        Attributes:
-            user_id (str): The unique identifier for the user.
-            session_id (str): The unique identifier for the session data.
-            metadata (Optional[Dict[str, str]]): Additional metadata associated with the session. Optional.
-            created_at (Optional[str]): The datetime when the session was opened. Optional.
-    CaptureSessionRequest:
-      properties:
-        type:
-          type: string
-          enum:
-            - capture-session
-          const: capture-session
-          title: Type
-          default: capture-session
-        body:
-          $ref: '#/components/schemas/CaptureSessionBody'
-      type: object
-      required:
-        - body
-      title: CaptureSessionRequest
-      description: |-
-        Represents a request to capture a session.
-
-        Attributes:
-            type (Literal[IngestionType.OpenSession]): The type of ingestion, set to IngestionType.OpenSession.
-            body (OpenSessionBody): The body of the open session request.
+      title: HTTPValidationError
     ValidationError:
       properties:
         loc:
@@ -603,133 +647,8 @@ components:
         Attributes:
             type (Literal[IngestionType.CaptureTrackEvent]): The type of ingestion, set to IngestionType.CaptureTrackEvent.
             body (CaptureTrackEventBody): The body of the capture track event request.
-    UpdateTraceBody:
-      properties:
-        session_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Session Id
-          description: The unique identifier for the record.
-        record_id:
-          type: string
-          title: Record Id
-        created_at:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Created At
-          description: The datetime when the record was captured. Optional.
-        metadata:
-          anyOf:
-            - type: object
-            - type: 'null'
-          title: Metadata
-          description: Additional metadata associated with the record. Optional.
-        ref_record_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Ref Record Id
-          description: The record ID to reference. Optional.
-        ended_at:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Ended At
-      type: object
-      required:
-        - record_id
-        - ended_at
-      title: UpdateTraceBody
-    UpdateTraceRequest:
-      properties:
-        type:
-          type: string
-          enum:
-            - update-trace
-          const: update-trace
-          title: Type
-          default: update-trace
-        body:
-          $ref: '#/components/schemas/UpdateTraceBody'
-      type: object
-      required:
-        - body
-      title: UpdateTraceRequest
-    UpdateSpanBody:
-      properties:
-        record_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Record Id
-          description: The unique identifier for the record.
-        created_at:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Created At
-          description: The datetime when the observation was captured. Optional.
-        name:
-          type: string
-          title: Name
-          description: The name of the observation. Optional.
-        parent_observation_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Parent Observation Id
-          description: The parent observation ID. Optional.
-        observation_id:
-          type: string
-          title: Observation Id
-        ended_at:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Ended At
-        inputs:
-          anyOf:
-            - type: object
-            - type: 'null'
-          title: Inputs
-        outputs:
-          anyOf:
-            - type: object
-            - type: 'null'
-          title: Outputs
-      type: object
-      required:
-        - name
-        - observation_id
-        - ended_at
-        - inputs
-        - outputs
-      title: UpdateSpanBody
-    UpdateSpanRequest:
-      properties:
-        type:
-          type: string
-          enum:
-            - update-span
-          const: update-span
-          title: Type
-          default: update-span
-        body:
-          $ref: '#/components/schemas/UpdateSpanBody'
-      type: object
-      required:
-        - body
-      title: UpdateSpanRequest
     UpdateGenerationBody:
       properties:
-        record_id:
-          anyOf:
-            - type: string
-            - type: 'null'
-          title: Record Id
-          description: The unique identifier for the record.
         created_at:
           anyOf:
             - type: string
@@ -737,7 +656,9 @@ components:
           title: Created At
           description: The datetime when the observation was captured. Optional.
         name:
-          type: string
+          anyOf:
+            - type: string
+            - type: 'null'
           title: Name
           description: The name of the observation. Optional.
         parent_observation_id:
@@ -757,20 +678,18 @@ components:
         inputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Inputs
         outputs:
           anyOf:
             - type: object
+              additionalProperties: true
             - type: 'null'
           title: Outputs
       type: object
       required:
-        - name
         - observation_id
-        - ended_at
-        - inputs
-        - outputs
       title: UpdateGenerationBody
     UpdateGenerationRequest:
       properties:
@@ -787,27 +706,126 @@ components:
       required:
         - body
       title: UpdateGenerationRequest
-    IdentifyUserRequest:
+    UpdateSpanBody:
+      properties:
+        created_at:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Created At
+          description: The datetime when the observation was captured. Optional.
+        name:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Name
+          description: The name of the observation. Optional.
+        parent_observation_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Parent Observation Id
+          description: The parent observation ID. Optional.
+        observation_id:
+          type: string
+          title: Observation Id
+        ended_at:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Ended At
+        inputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Inputs
+        outputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Outputs
+      type: object
+      required:
+        - observation_id
+      title: UpdateSpanBody
+    UpdateSpanRequest:
       properties:
         type:
           type: string
           enum:
-            - identify-user
-          const: identify-user
+            - update-span
+          const: update-span
           title: Type
-          default: identify-user
+          default: update-span
         body:
-          $ref: '#/components/schemas/IdentifyUserBody'
+          $ref: '#/components/schemas/UpdateSpanBody'
       type: object
       required:
         - body
-      title: IdentifyUserRequest
-      description: |-
-        Represents a request to identify a user.
+      title: UpdateSpanRequest
+    UpdateTraceBody:
+      properties:
+        record_id:
+          type: string
+          title: Record Id
+        created_at:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Created At
+          description: The datetime when the record was captured. Optional.
+        metadata:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Metadata
+          description: Additional metadata associated with the record. Optional.
+        ref_record_id:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Ref Record Id
+          description: The record ID to reference. Optional.
+        ended_at:
+          anyOf:
+            - type: string
+            - type: 'null'
+          title: Ended At
+        inputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Inputs
+        outputs:
+          anyOf:
+            - type: object
+              additionalProperties: true
+            - type: 'null'
+          title: Outputs
+      type: object
+      required:
+        - record_id
+      title: UpdateTraceBody
+    UpdateTraceRequest:
+      properties:
+        type:
+          type: string
+          enum:
+            - update-trace
+          const: update-trace
+          title: Type
+          default: update-trace
+        body:
+          $ref: '#/components/schemas/UpdateTraceBody'
+      type: object
+      required:
+        - body
+      title: UpdateTraceRequest
 
-        Attributes:
-            type (Literal[IngestionType.IdentifyUser]): The type of ingestion, which is set to IngestionType.IdentifyUser.
-            body (IdentifyUserBody): The body of the identification request.
   securitySchemes:
     APIKeyHeader:
       type: apiKey
