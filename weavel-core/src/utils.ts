@@ -1,4 +1,4 @@
-import { type WeavelOptions } from './types';
+import { type WeavelCoreOptions } from './types';
 
 export function assert(truthyValue: any, message: string): void {
   if (!truthyValue) {
@@ -97,7 +97,7 @@ export function getEnv<T = string>(key: string): T | undefined {
   return;
 }
 
-export function configWeavelSDK(params?: WeavelOptions): WeavelOptions {
+export function configWeavelSDK(params?: WeavelCoreOptions): WeavelCoreOptions {
   const { apiKey, ...coreOptions } = params ?? {};
 
   // check environment variables if values not provided

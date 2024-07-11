@@ -1,6 +1,6 @@
 import { type components, type paths } from './openapi/server';
 
-export type WeavelOptions = {
+export type WeavelCoreOptions = {
   // Weavel API key obtained from the dashboard project settings
   apiKey?: string;
   // Weavel API baseUrl (https://api.weavel.ai by default)

@@ -578,6 +578,7 @@ components:
           type: object
           title: Properties
           description: Additional properties associated with the track event. Optional.
+          additionalProperties: true
         created_at:
           anyOf:
             - type: string

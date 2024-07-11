@@ -9,7 +9,7 @@ import {
   type WeavelFetchOptions,
   type WeavelFetchResponse,
   type WeavelQueueItem,
-  type WeavelOptions,
+  type WeavelCoreOptions,
   type IngestionType,
   WeavelPersistedProperty,
   type CaptureTraceBody,
@@ -81,7 +81,7 @@ abstract class WeavelWorker {
   private enabled: boolean;
 
   // internal
-  protected _options: WeavelOptions;
+  protected _options: WeavelCoreOptions;
   protected _events = new SimpleEventEmitter();
   protected _flushTimer?: any;
   protected _retryOptions: RetriableOptions;
@@ -101,7 +101,7 @@ abstract class WeavelWorker {
     value: T | null
   ): void;
 
-  constructor(params: WeavelOptions) {
+  constructor(params: WeavelCoreOptions) {
     this._options = params;
     const { apiKey, enabled, ...options } = params;
 
@@ -560,7 +560,7 @@ abstract class WeavelWorker {
 }
 
 export abstract class WeavelWebWorker extends WeavelWorker {
-  constructor(params: WeavelOptions) {
+  constructor(params: WeavelCoreOptions) {
     const { flushAt, flushInterval, apiKey, enabled, ...rest } = params;
     let isObservabilityEnabled = enabled === false ? false : true;
 
@@ -827,7 +827,7 @@ export class WeavelWebGenerationClient {
 }
 
 export abstract class WeavelCoreWorker extends WeavelWorker {
-  constructor(params: WeavelOptions) {
+  constructor(params: WeavelCoreOptions) {
     const { apiKey, enabled } = params;
     let isObservabilityEnabled = enabled === false ? false : true;
 

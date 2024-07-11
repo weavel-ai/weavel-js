@@ -490,7 +490,9 @@ export interface components {
              * Properties
              * @description Additional properties associated with the track event. Optional.
              */
-            properties: Record<string, never>;
+            properties: {
+                [key: string]: unknown;
+            };
             /**
              * Created At
              * @description The datetime when the User is identified. Optional.
