@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+dependencies:
+  weavel-core:
+    specifier: ^1.0.4
+    version: 1.0.4
+
 devDependencies:
   '@size-limit/preset-small-lib':
     specifier: ^11.1.4
@@ -7585,6 +7590,11 @@ packages:
     dependencies:
       defaults: 1.0.4
     dev: true
+
+  /weavel-core@1.0.4:
+    resolution: {integrity: sha512-CVJIbeg9y9Z5w+EXn1BvtbRo/eI9m/ffwedKyw/cpPa9u58yUHk2OUNXgPKBTOmRSylAmfljUDXlAcyszzAQIA==}
+    engines: {node: '>=18'}
+    dev: false
 
   /webidl-conversions@4.0.2:
     resolution: {integrity: sha512-YQ+BmxuTgd6UXZW3+ICGfyqRyHXVlD5GtQr5+qjiNW7bF0cqrzX500HVXPBOvgXb5YnzDd+h0zqyv61KUD7+Sg==}

@@ -51,7 +51,7 @@
     "ts-jest": "^29.1.5",
     "turbo": "^2.0.6",
     "typedoc": "^0.26.3",
-    "typescript": "^5.5.3"
+    "typescript": "^5.5.4"
   },
   "packageManager": "npm@7.0.0",
   "husky": {

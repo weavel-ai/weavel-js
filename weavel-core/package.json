@@ -1,6 +1,6 @@
 {
   "name": "weavel-core",
-  "version": "1.0.1",
+  "version": "1.0.4",
   "engines": {
     "node": ">=18"
   },
@@ -24,8 +24,8 @@
     }
   },
   "files": [
-    "dist",
-    "src"
+    "lib/**/*",
+    "README.md"
   ],
   "scripts": {
     "size": "size-limit",
