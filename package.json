@@ -1,7 +1,7 @@
 {
   "name": "weavel-sdk",
   "description": "Modular monorepo for all Weavel JS/TS SDKs",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "engines": {
     "node": ">=18"
   },

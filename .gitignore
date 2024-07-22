@@ -9,7 +9,6 @@ coverage/
 .yalc
 yalc.lock
 .env
-langfuse-server
 docs
 .DS_Store
 .turbo

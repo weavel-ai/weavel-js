@@ -1,6 +1,6 @@
 {
   "name": "weavel",
-  "version": "0.1.0",
+  "version": "1.0.1",
   "engines": {
     "node": ">=18"
   },
@@ -55,5 +55,7 @@
     "tslib": "^2.6.3",
     "typescript": "^5.5.3"
   },
-  "dependencies": {}
+  "dependencies": {
+    "weavel-core": "^1.0.0"
+  }
 }

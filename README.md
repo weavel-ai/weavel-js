@@ -1,4 +1,4 @@
-![GitHub Banner](https://github.com/weavel/weavel-js/assets/2834609/d1613347-445f-4e91-9e84-428fda9c3659)
+![GitHub Banner](https://www.dropbox.com/scl/fi/ttlfuiy2of8p300lkwfhp/Weavel-Text-Logo-Light-BG.png?rlkey=439qsph29a23xf1bfp8vyi4qv&st=unt7fzcu&raw=1)
 
 # weavel-js
 
@@ -22,7 +22,3 @@ Modular monorepo for the Weavel JS/TS client libraries.
 ## License
 
 [MIT](LICENSE)
-
-## Credits
-
-Thanks to the PostHog team for the awesome work on [posthog-js-lite](https://github.com/PostHog/posthog-js-lite). This project is based on it as it was the best starting point to build a modular SDK repo to support various environments.
