@@ -1,4 +1,4 @@
-![GitHub Banner](https://www.dropbox.com/scl/fi/ttlfuiy2of8p300lkwfhp/Weavel-Text-Logo-Light-BG.png?rlkey=439qsph29a23xf1bfp8vyi4qv&st=unt7fzcu&raw=1)
+![GitHub Banner](https://www.dropbox.com/scl/fi/kxab974gk68f363sdnjrk/Weavel-Text-Logo-Light-BG.png?rlkey=bp3f48baupmgwk5ckfb3u4hm0&st=u3e6ueza&raw=1)
 
 # Weavel
 
