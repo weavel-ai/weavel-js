@@ -64,7 +64,7 @@ const configs = packages.reduce((acc, x) => {
         { file: `./${x}/lib/index.d.mts`, format: "es" },
       ],
       plugins: [
-        dts(),
+        dts.default(),
         // as we rollup the dts files, we can remove the original files/directory afterwards
         del({ hook: "buildEnd", targets: `./${x}/lib/${x}/` }),
       ],
