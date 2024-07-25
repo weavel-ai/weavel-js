@@ -83,14 +83,14 @@ export interface components {
              */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
             /**
              * Outputs
              * @description The outputs of the generation. Optional.
              */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
         };
         /**
          * CaptureGenerationRequest
@@ -310,14 +310,14 @@ export interface components {
              */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
             /**
              * Outputs
              * @description The outputs of the generation. Optional.
              */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
         };
         /**
          * CaptureSpanRequest
@@ -380,14 +380,14 @@ export interface components {
              */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
             /**
              * Outputs
              * @description The outputs of the outputs. Optional.
              */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
         };
         /**
          * CaptureTraceRequest
@@ -555,11 +555,11 @@ export interface components {
             /** Inputs */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string |  null;
             /** Outputs */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
         };
         /** UpdateGenerationRequest */
         UpdateGenerationRequest: {
@@ -596,11 +596,11 @@ export interface components {
             /** Inputs */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
             /** Outputs */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
         };
         /** UpdateSpanRequest */
         UpdateSpanRequest: {
@@ -639,11 +639,11 @@ export interface components {
             /** Inputs */
             inputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string | null;
             /** Outputs */
             outputs?: {
                 [key: string]: unknown;
-            } | null;
+            } | string |  null;
         };
         /** UpdateTraceRequest */
         UpdateTraceRequest: {
