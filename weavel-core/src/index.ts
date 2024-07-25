@@ -205,11 +205,25 @@ abstract class WeavelWorker {
   }
 
   protected traceStateless(body: CaptureTraceBody): string {
-    const { record_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
+    const {
+      record_id: bodyId,
+      created_at: bodyCreatedAt,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
+      ...rest
+    } = body;
 
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTraceBody = {
       record_id,
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -218,12 +232,26 @@ abstract class WeavelWorker {
   }
 
   protected spanStateless(body: CaptureSpanBody): string {
-    const { observation_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
+    const {
+      observation_id: bodyId,
+      created_at: bodyCreatedAt,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
+      ...rest
+    } = body;
 
     const observation_id = bodyId || generateUUID();
 
     const parsedBody: CaptureSpanBody = {
       observation_id,
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -232,12 +260,26 @@ abstract class WeavelWorker {
   }
 
   protected generationStateless(body: CaptureGenerationBody): string {
-    const { observation_id: bodyId, created_at: bodyCreatedAt, ...rest } = body;
+    const {
+      observation_id: bodyId,
+      created_at: bodyCreatedAt,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
+      ...rest
+    } = body;
 
     const observation_id = bodyId || generateUUID();
 
     const parsedBody: CaptureGenerationBody = {
       observation_id,
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -261,17 +303,53 @@ abstract class WeavelWorker {
   }
 
   protected updateTraceStateless(body: UpdateTraceBody): string {
-    this.enqueue('update-trace', body);
+    const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
+    const parsedBody: UpdateTraceBody = {
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
+      ...rest,
+    };
+    this.enqueue('update-trace', parsedBody);
     return body.record_id;
   }
 
   protected updateSpanStateless(body: UpdateSpanBody): string {
-    this.enqueue('update-span', body);
+    const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
+    const parsedBody: UpdateSpanBody = {
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
+      ...rest,
+    };
+    this.enqueue('update-span', parsedBody);
     return body.observation_id;
   }
 
   protected updateGenerationStateless(body: UpdateGenerationBody): string {
-    this.enqueue('update-generation', body);
+    const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
+    const parsedBody: UpdateGenerationBody = {
+      inputs:
+        typeof bodyInputs === 'string'
+          ? { _RAW_VALUE_: bodyInputs }
+          : bodyInputs,
+      outputs:
+        typeof bodyOutputs === 'string'
+          ? { _RAW_VALUE_: bodyOutputs }
+          : bodyOutputs,
+      ...rest,
+    };
+    this.enqueue('update-generation', parsedBody);
     return body.observation_id;
   }
 
