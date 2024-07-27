@@ -216,14 +216,8 @@ abstract class WeavelWorker {
     const record_id = bodyId ?? generateUUID();
     const parsedBody: CaptureTraceBody = {
       record_id,
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -244,14 +238,8 @@ abstract class WeavelWorker {
 
     const parsedBody: CaptureSpanBody = {
       observation_id,
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -272,14 +260,8 @@ abstract class WeavelWorker {
 
     const parsedBody: CaptureGenerationBody = {
       observation_id,
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       created_at: bodyCreatedAt ?? new Date().toISOString(),
       ...rest,
     };
@@ -305,14 +287,8 @@ abstract class WeavelWorker {
   protected updateTraceStateless(body: UpdateTraceBody): string {
     const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
     const parsedBody: UpdateTraceBody = {
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       ...rest,
     };
     this.enqueue('update-trace', parsedBody);
@@ -322,14 +298,8 @@ abstract class WeavelWorker {
   protected updateSpanStateless(body: UpdateSpanBody): string {
     const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
     const parsedBody: UpdateSpanBody = {
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       ...rest,
     };
     this.enqueue('update-span', parsedBody);
@@ -339,14 +309,8 @@ abstract class WeavelWorker {
   protected updateGenerationStateless(body: UpdateGenerationBody): string {
     const { inputs: bodyInputs, outputs: bodyOutputs, ...rest } = body;
     const parsedBody: UpdateGenerationBody = {
-      inputs:
-        typeof bodyInputs === 'string'
-          ? { _RAW_VALUE_: bodyInputs }
-          : bodyInputs,
-      outputs:
-        typeof bodyOutputs === 'string'
-          ? { _RAW_VALUE_: bodyOutputs }
-          : bodyOutputs,
+      inputs: bodyInputs,
+      outputs: bodyOutputs,
       ...rest,
     };
     this.enqueue('update-generation', parsedBody);

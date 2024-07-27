@@ -6,8 +6,8 @@ settings:
 
 dependencies:
   weavel-core:
-    specifier: ^1.0.5
-    version: 1.0.5
+    specifier: ^1.1.0
+    version: 1.1.0
 
 devDependencies:
   '@size-limit/preset-small-lib':
@@ -7591,8 +7591,8 @@ packages:
       defaults: 1.0.4
     dev: true
 
-  /weavel-core@1.0.5:
-    resolution: {integrity: sha512-kPgCyvR/NA2deJk5lKsnWE5fZJu7BWqTwB3zqHsorKUUQ4rblHWOyx6erfAva6E0jzSC2v5EQaNNLHVN/nkf0g==}
+  /weavel-core@1.1.0:
+    resolution: {integrity: sha512-bEkx+KkLw5tIhAwUlN64LeuWwApPP//YFB/4iQhg6omVEmNWJzBFXnahxnh5SU0ZjEkkFyL6gLnyh3qOfUy5Qg==}
     engines: {node: '>=18'}
     dev: false
 
