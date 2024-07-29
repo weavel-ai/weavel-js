@@ -720,6 +720,12 @@ export class WeavelWebSessionClient {
     return await this.client.message({ session_id: this.id, ...body });
   }
 
+  async trace(
+    body: Omit<CaptureTraceBody, 'session_id'>
+  ): Promise<WeavelWebTraceClient> {
+    return await this.client.trace({ session_id: this.id, ...body });
+  }
+
   async span(body: CaptureSpanBody): Promise<WeavelWebSpanClient> {
     return await this.client._span(body);
   }
@@ -903,6 +909,11 @@ export abstract class WeavelCoreWorker extends WeavelWorker {
     return this;
   }
 
+  message(body: CaptureMessageBody): this {
+    this.messageStateless(body);
+    return this;
+  }
+
   trace(body: CaptureTraceBody): WeavelTraceClient {
     const id = this.traceStateless(body);
     const t = new WeavelTraceClient(this, id);
@@ -947,6 +958,14 @@ export class WeavelSessionClient {
   constructor(client: WeavelCoreWorker, id: string) {
     this.client = client;
     this.id = id;
+  }
+
+  message(body: Omit<CaptureMessageBody, 'session_id'>): WeavelCoreWorker {
+    return this.client.message({ session_id: this.id, ...body });
+  }
+
+  track(body: Omit<CaptureTrackEventBody, 'session_id'>): WeavelCoreWorker {
+    return this.client.track({ session_id: this.id, ...body });
   }
 
   trace(body: Omit<CaptureTraceBody, 'session_id'>): WeavelTraceClient {

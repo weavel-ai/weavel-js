@@ -1,0 +1,47 @@
+name: Publish to npm
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16" # or any version you are using
+          registry-url: "https://registry.npmjs.org/"
+
+      - name: Install dependencies
+        run: pnpm install
+
+      - name: Build weavel-core
+        working-directory: ./weavel-core
+        run: pnpm run build
+
+      - name: Publish weavel-core
+        working-directory: ./weavel-core
+        run: pnpm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install dependencies in weavel
+        working-directory: ./weavel
+        run: pnpm install
+
+      - name: Build weavel
+        working-directory: ./weavel
+        run: pnpm run build
+
+      - name: Publish weavel
+        working-directory: ./weavel
+        run: pnpm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
