@@ -19,29 +19,30 @@ jobs:
           node-version: "16" # or any version you are using
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Install dependencies
-        run: pnpm install
+      - name: Install dependencies for weavel-core
+        working-directory: ./weavel-core
+        run: npm install
 
       - name: Build weavel-core
         working-directory: ./weavel-core
-        run: pnpm run build
+        run: npm run build
 
       - name: Publish weavel-core
         working-directory: ./weavel-core
-        run: pnpm publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
-      - name: Install dependencies in weavel
+      - name: Install dependencies for weavel
         working-directory: ./weavel
-        run: pnpm install
+        run: npm install
 
       - name: Build weavel
         working-directory: ./weavel
-        run: pnpm run build
+        run: npm run build
 
       - name: Publish weavel
         working-directory: ./weavel
-        run: pnpm publish
+        run: npm publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
