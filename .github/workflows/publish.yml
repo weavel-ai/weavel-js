@@ -37,8 +37,8 @@ jobs:
         working-directory: ./weavel
         run: npm install
 
-      - name: Build weavel
-        working-directory: ./weavel
+      - name: Build packages
+        working-directory: ./
         run: npm run build
 
       - name: Publish weavel
