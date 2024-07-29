@@ -19,12 +19,12 @@ jobs:
           node-version: "16" # or any version you are using
           registry-url: "https://registry.npmjs.org/"
 
-      - name: Install dependencies for weavel-core
-        working-directory: ./weavel-core
+      - name: Install dependencies
+        working-directory: ./
         run: npm install
 
-      - name: Build weavel-core
-        working-directory: ./weavel-core
+      - name: Build packages
+        working-directory: ./
         run: npm run build
 
       - name: Publish weavel-core
