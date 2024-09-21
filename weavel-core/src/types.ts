@@ -89,6 +89,22 @@ export type UpdateGenerationBody = FixTypes<
   components['schemas']['UpdateGenerationBody']
 >;
 
+export type CreatePromptBody = FixTypes<
+  components['schemas']['CreatePromptBody']
+>;
+export type GetPromptInfoResponse = FixTypes<
+  components['schemas']['GetPromptInfoResponse']
+>;
+export type CreatePromptVersionBody = FixTypes<
+  components['schemas']['CreatePromptVersionBody']
+>;
+export type GetPromptVersionBody = FixTypes<
+  components['schemas']['GetPromptVersionBody']
+>;
+export type GetPromptVersionResponse = FixTypes<
+  components['schemas']['GetPromptVersionResponse']
+>;
+
 export type JsonType =
   | string
   | number

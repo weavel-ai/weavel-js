@@ -23,6 +23,9 @@ import {
   type UpdateTraceBody,
   type UpdateSpanBody,
   type UpdateGenerationBody,
+  type CreatePromptBody,
+  type CreatePromptVersionBody,
+  type GetPromptVersionResponse,
 } from './types';
 
 import { SimpleEventEmitter } from './eventemitter';
@@ -325,6 +328,37 @@ abstract class WeavelWorker {
     }
   }
 
+  async createPrompt(body: CreatePromptBody): Promise<void> {
+    await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/prompts`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(body) })
+    );
+  }
+
+  async createPromptVersion(
+    body: CreatePromptVersionBody
+  ): Promise<void> {
+    const { prompt_name: bodyPromptName, ...rest } = body;
+    const promptName = encodeURIComponent(bodyPromptName);
+
+    await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/prompts/${promptName}/versions`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(rest) })
+    );
+  }
+
+  async getPromptVersion(
+    promptName: string,
+    version?: number | 'latest'
+  ): Promise<GetPromptVersionResponse> {
+    const encodedName = encodeURIComponent(promptName);
+
+    return this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/prompts/${encodedName}/versions/${version}`,
+      this._getFetchOptions({ method: 'GET' })
+    );
+  }
+
   /***
    *** QUEUEING AND FLUSHING
    ***/
@@ -574,6 +608,23 @@ abstract class WeavelWorker {
           string + ', ' + url + ', ' + JSON.stringify(options)
         )
     );
+  }
+
+  private async fetchAndLogErrors<T>(
+    url: string,
+    options: WeavelFetchOptions
+  ): Promise<T> {
+    const res = await this.fetch(url, options);
+    const data = await res.json();
+
+    if (res.status < 200 || res.status >= 400) {
+      this._events.emit(
+        'error',
+        new WeavelFetchHttpError(res, JSON.stringify(data))
+      );
+    }
+
+    return data;
   }
 
   async shutdownAsync(): Promise<void> {
