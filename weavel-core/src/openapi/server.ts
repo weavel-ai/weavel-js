@@ -96,23 +96,33 @@ export interface components {
        * Inputs
        * @description The inputs of the generation. Optional.
        */
-      inputs?: {
-        [key: string]: unknown;
-      } | unknown[] | string | null;
+      inputs?:
+        | {
+            [key: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | null;
       /**
        * Outputs
        * @description The outputs of the generation. Optional.
        */
-      outputs?: {
-        [key: string]: unknown;
-      } | unknown[] | string | null;
+      outputs?:
+        | {
+            [key: string]: unknown;
+          }
+        | unknown[]
+        | string
+        | null;
       /**
        * Messages
        * @description The messages of the generation. Optional.
        */
-      messages?: {
-        [key: string]: string;
-      }[] | null;
+      messages?:
+        | {
+            [key: string]: string;
+          }[]
+        | null;
       /**
        * Model
        * @description The model of the generation. Optional.
@@ -728,7 +738,10 @@ export interface components {
       type: 'update-trace';
       body: components['schemas']['UpdateTraceBody'];
     };
-    /** CreatePromptBody */
+    /**
+     * CreatePromptBody
+     * Represents the body of a request to create a prompt
+     */
     CreatePromptBody: {
       /**
        * Name

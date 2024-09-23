@@ -5,10 +5,19 @@ import {
   parseChunk,
   parseCompletionOutput,
   parseInputArgs,
+  parseUsage,
 } from './parseOpenAI';
 import { isAsyncIterable } from './utils';
 import type { WeavelConfig } from './types';
 import { CaptureGenerationBody } from 'weavel-core';
+
+const pricing: { [key: string]: { input: number; output: number } } = {
+  'gpt-4o': { input: 0.000005, output: 0.000015 },
+  'gpt-4o-mini': { input: 0.00000015, output: 0.0000006 },
+  'gpt-4o-mini-2024-07-18': { input: 0.00000015, output: 0.0000006 },
+  'o1-mini': { input: 0.000003, output: 0.000012 },
+  'o1-preview': { input: 0.000015, output: 0.00006 },
+};
 
 type GenericMethod = (...args: unknown[]) => unknown;
 
@@ -24,10 +33,8 @@ const wrapMethod = async <T extends GenericMethod>(
   config?: WeavelConfig,
   ...args: Parameters<T>
 ): Promise<ReturnType<T> | any> => {
-  console.log('Starting wrapMethod');
   try {
-    const { model, input } = parseInputArgs(args[0] ?? {});
-    console.log('Parsed input args:', { model, input });
+    const { model, input, modelParameters } = parseInputArgs(args[0] ?? {});
 
     let observationData: CaptureGenerationBody = {
       name: config?.generationName ?? 'OpenAI Generation',
@@ -39,18 +46,14 @@ const wrapMethod = async <T extends GenericMethod>(
           : null,
       model: model,
     };
-    console.log('Created observationData:', observationData);
 
     const weavel = WeavelSingleton.getInstance(config?.clientInitParams);
-    console.log('Got Weavel instance');
+    const startTime = new Date();
 
     try {
-      console.log('Calling tracedMethod');
-      const res = await tracedMethod(...args);
-      console.log('tracedMethod result:', res);
+      const res = (await tracedMethod(...args)) as any;
 
       if (isAsyncIterable(res)) {
-        console.log('Result is AsyncIterable');
         async function* tracedOutputGenerator(): AsyncGenerator<
           unknown,
           void,
@@ -65,9 +68,7 @@ const wrapMethod = async <T extends GenericMethod>(
           for await (const rawChunk of response as AsyncIterable<unknown>) {
             completionStartTime = completionStartTime ?? new Date();
 
-            console.log('Processing chunk:', rawChunk);
             const processedChunk = parseChunk(rawChunk);
-            console.log('Processed chunk:', processedChunk);
 
             if (!processedChunk.isToolCall) {
               textChunks.push(processedChunk.data);
@@ -82,40 +83,77 @@ const wrapMethod = async <T extends GenericMethod>(
             toolCallChunks.length > 0
               ? getToolCallOutput(toolCallChunks)
               : textChunks.join('');
-          console.log('Final output:', output);
 
-          console.log('Calling weavel.generation');
+          const endTime = new Date();
+          const latency = Number(
+            ((endTime.getTime() - startTime.getTime()) / 1000).toFixed(6)
+          );
+          const usage = parseUsage(res);
+
+          let cost = 0;
+          if (usage) {
+            const { prompt_tokens, completion_tokens } = usage;
+            cost = Number(
+              (
+                (prompt_tokens ?? 0) * pricing[model].input +
+                (completion_tokens ?? 0) * pricing[model].output
+              ).toFixed(6)
+            );
+          }
+
           weavel.generation({
             ...observationData,
             outputs: [output],
+            latency,
+            cost: Number(cost),
           });
         }
 
         return tracedOutputGenerator() as ReturnType<T>;
       }
 
-      console.log('Result is not AsyncIterable');
       const output = parseCompletionOutput(res);
-      console.log('Parsed completion output:', output);
+      const endTime = new Date();
+      const latency = Number(
+        ((endTime.getTime() - startTime.getTime()) / 1000).toFixed(6)
+      );
 
-      console.log('Calling weavel.generation');
+      let cost = 0;
+      const usage = parseUsage(res);
+
+      if (usage) {
+        const { prompt_tokens, completion_tokens } = usage;
+        cost = Number(
+          (
+            (prompt_tokens ?? 0) * pricing[model].input +
+            (completion_tokens ?? 0) * pricing[model].output
+          ).toFixed(6)
+        );
+      }
+
       weavel.generation({
         ...observationData,
         outputs: [output],
+        latency,
+        cost: Number(cost),
       });
 
       return res;
     } catch (error) {
-      console.error('Error in tracedMethod:', error);
-      console.log('Calling weavel.generation with error');
+      const endTime = new Date();
+      const latency = Number(
+        ((endTime.getTime() - startTime.getTime()) / 1000).toFixed(6)
+      );
+
       weavel.generation({
         ...observationData,
+        latency,
+        cost: 0,
       });
 
       throw error;
     }
   } catch (error) {
-    console.error('Error in wrapMethod:', error);
     throw error;
   }
 };

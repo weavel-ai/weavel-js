@@ -26,11 +26,14 @@ import {
   type CreatePromptBody,
   type CreatePromptVersionBody,
   type GetPromptVersionResponse,
+  type DatasetItem,
+  type Dataset,
+  type ResponseFormat,
 } from './types';
 
 import { SimpleEventEmitter } from './eventemitter';
 export * as utils from './utils';
-export { type SingleIngestionEvent } from './types';
+export { type SingleIngestionEvent, type Usage } from './types';
 export { WeavelMemoryStorage } from './storage-memory';
 
 class WeavelFetchHttpError extends Error {
@@ -328,6 +331,42 @@ abstract class WeavelWorker {
     }
   }
 
+  /* Dataset, Prompts and Optimization */
+  async createDataset(name: string, description?: string): Promise<void> {
+    const body = {
+      name: name,
+      description: description ?? null,
+    };
+    await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/datasets`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(body) })
+    );
+  }
+
+  async createDatasetItems(
+    datasetName: string,
+    items: Array<DatasetItem>
+  ): Promise<void> {
+    const encodedName = encodeURIComponent(datasetName);
+    await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/datasets/${encodedName}/items`,
+      this._getFetchOptions({
+        method: 'POST',
+        body: JSON.stringify(items),
+      })
+    );
+  }
+
+  async fetchDataset(datasetName: string): Promise<Dataset> {
+    const encodedName = encodeURIComponent(datasetName);
+    const data = await this.fetchAndLogErrors<Dataset>(
+      `${this.baseUrl}/api/public/v2/datasets/${encodedName}`,
+      this._getFetchOptions({ method: 'GET' })
+    );
+
+    return data;
+  }
+
   async createPrompt(body: CreatePromptBody): Promise<void> {
     await this.fetchAndLogErrors(
       `${this.baseUrl}/api/public/v2/prompts`,
@@ -345,7 +384,7 @@ abstract class WeavelWorker {
     );
   }
 
-  async getPromptVersion(
+  async fetchPromptVersion(
     promptName: string,
     version?: number | 'latest'
   ): Promise<GetPromptVersionResponse> {
@@ -355,6 +394,86 @@ abstract class WeavelWorker {
       `${this.baseUrl}/api/public/v2/prompts/${encodedName}/versions/${version}`,
       this._getFetchOptions({ method: 'GET' })
     );
+  }
+
+  async optimizePrompt(
+    datasetName: string,
+    promptName: string,
+    version?: string,
+    inputVars?: Record<string, any>,
+    outputVars?: Record<string, any>,
+    responseFormat?: ResponseFormat,
+    evaluationType: 'TEMPLATE' | 'CUSTOM' = 'TEMPLATE',
+    evaluationMetric?: Record<string, any>,
+    description?: string
+  ): Promise<void> {
+    const body = {
+      dataset_name: datasetName,
+      prompt_name: promptName,
+      version,
+      input_vars: inputVars,
+      output_vars: outputVars,
+      response_format: responseFormat
+        ? {
+            type: responseFormat.type,
+            json_schema: responseFormat.json_schema
+              ? {
+                  name: responseFormat.json_schema.name,
+                  schema: responseFormat.json_schema.schema,
+                  strict: responseFormat.json_schema.strict,
+                }
+              : null,
+          }
+        : null,
+      evaluation_type: evaluationType,
+      evaluation_metric: evaluationMetric,
+      description,
+    };
+
+    await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/ape/optimize`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(body) })
+    );
+  }
+
+  async scheduleOptimization(
+    promptName: string,
+    datasetName: string,
+    interval: number,
+    triggerThreshold: number,
+    ignoreKeys?: string[]
+  ): Promise<Record<string, any>> {
+    const body = {
+      prompt_name: promptName,
+      dataset_name: datasetName,
+      interval,
+      trigger_threshold: triggerThreshold,
+      ignore_keys: ignoreKeys,
+    };
+
+    const response = (await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/ape/schedule`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(body) })
+    )) as Promise<Record<string, any>>;
+
+    return response;
+  }
+
+  async listOptimizationSchedule(
+    promptName?: string,
+    datasetName?: string
+  ): Promise<Record<string, any>[]> {
+    const body = {
+      prompt_name: promptName,
+      dataset_name: datasetName,
+    };
+
+    const response = await this.fetchAndLogErrors(
+      `${this.baseUrl}/api/public/v2/ape/list`,
+      this._getFetchOptions({ method: 'POST', body: JSON.stringify(body) })
+    );
+
+    return response as Promise<Record<string, any>[]>;
   }
 
   /***

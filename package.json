@@ -23,7 +23,8 @@
     "generate-api": "openapi-typescript weavel-core/openapi-spec.yaml --output weavel-core/src/openapi/server.ts"
   },
   "dependencies": {
-    "axios": "^1.7.2"
+    "axios": "^1.7.2",
+    "openai": "^4.63.0"
   },
   "devDependencies": {
     "@babel/core": "^7.24.7",
