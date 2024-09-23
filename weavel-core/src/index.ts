@@ -335,9 +335,7 @@ abstract class WeavelWorker {
     );
   }
 
-  async createPromptVersion(
-    body: CreatePromptVersionBody
-  ): Promise<void> {
+  async createPromptVersion(body: CreatePromptVersionBody): Promise<void> {
     const { prompt_name: bodyPromptName, ...rest } = body;
     const promptName = encodeURIComponent(bodyPromptName);
 
@@ -709,6 +707,15 @@ export abstract class WeavelWebWorker extends WeavelWorker {
     return t;
   }
 
+  async generation(
+    body: CaptureGenerationBody
+  ): Promise<WeavelWebGenerationClient> {
+    const id = this.generationStateless(body);
+    const g = new WeavelWebGenerationClient(this, id, body.record_id);
+    await this.awaitAllQueuedAndPendingRequests();
+    return g;
+  }
+
   async _span(body: CaptureSpanBody): Promise<WeavelWebSpanClient> {
     const id = this.spanStateless(body);
     const s = new WeavelWebSpanClient(this, id, body.record_id);
@@ -720,15 +727,6 @@ export abstract class WeavelWebWorker extends WeavelWorker {
     this.logStateless(body);
     await this.awaitAllQueuedAndPendingRequests();
     return this;
-  }
-
-  async _generation(
-    body: CaptureGenerationBody
-  ): Promise<WeavelWebGenerationClient> {
-    const id = this.generationStateless(body);
-    const g = new WeavelWebGenerationClient(this, id, body.record_id);
-    await this.awaitAllQueuedAndPendingRequests();
-    return g;
   }
 
   async _updateTrace(body: UpdateTraceBody): Promise<this> {
@@ -788,7 +786,7 @@ export class WeavelWebSessionClient {
   async generation(
     body: CaptureGenerationBody
   ): Promise<WeavelWebGenerationClient> {
-    return await this.client._generation(body);
+    return await this.client.generation(body);
   }
 }
 
@@ -838,7 +836,7 @@ export abstract class WeavelWebObjectClient {
   async generation(
     body: Omit<CaptureGenerationBody, 'record_id' | 'parent_observation_id'>
   ): Promise<WeavelWebGenerationClient> {
-    return await this.client._generation({
+    return await this.client.generation({
       ...body,
       record_id: this.recordId,
       parent_observation_id: this.observationId,
@@ -971,14 +969,15 @@ export abstract class WeavelCoreWorker extends WeavelWorker {
     return t;
   }
 
+  generation(body: CaptureGenerationBody): WeavelGenerationClient {
+    const id = this.generationStateless(body);
+    const g = new WeavelGenerationClient(this, id, body.record_id);
+    return g;
+  }
+
   _span(body: CaptureSpanBody): WeavelSpanClient {
     const id = this.spanStateless(body);
     return new WeavelSpanClient(this, id, body.record_id);
-  }
-
-  _generation(body: CaptureGenerationBody): WeavelGenerationClient {
-    const id = this.generationStateless(body);
-    return new WeavelGenerationClient(this, id, body.record_id);
   }
 
   _log(body: CaptureLogBody): this {
@@ -1028,7 +1027,7 @@ export class WeavelSessionClient {
   }
 
   generation(body: CaptureGenerationBody): WeavelGenerationClient {
-    return this.client._generation(body);
+    return this.client.generation(body);
   }
 
   log(body: CaptureLogBody): WeavelCoreWorker {
@@ -1082,7 +1081,7 @@ export abstract class WeavelObjectClient {
   generation(
     body: Omit<CaptureGenerationBody, 'record_id' | 'parent_observation_id'>
   ): WeavelGenerationClient {
-    return this.client._generation({
+    return this.client.generation({
       ...body,
       record_id: this.recordId,
       parent_observation_id: this.observationId,

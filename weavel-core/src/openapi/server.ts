@@ -96,22 +96,43 @@ export interface components {
        * Inputs
        * @description The inputs of the generation. Optional.
        */
-      inputs?:
-        | {
-            [key: string]: unknown;
-          }
-        | string
-        | null;
+      inputs?: {
+        [key: string]: unknown;
+      } | unknown[] | string | null;
       /**
        * Outputs
        * @description The outputs of the generation. Optional.
        */
-      outputs?:
-        | {
-            [key: string]: unknown;
-          }
-        | string
-        | null;
+      outputs?: {
+        [key: string]: unknown;
+      } | unknown[] | string | null;
+      /**
+       * Messages
+       * @description The messages of the generation. Optional.
+       */
+      messages?: {
+        [key: string]: string;
+      }[] | null;
+      /**
+       * Model
+       * @description The model of the generation. Optional.
+       */
+      model?: string | null;
+      /**
+       * Latency
+       * @description The latency of the generation. Optional.
+       */
+      latency?: number | null;
+      /**
+       * Cost
+       * @description The cost of the generation. Optional.
+       */
+      cost?: number | null;
+      /**
+       * Prompt Name
+       * @description The name of the prompt. Optional.
+       */
+      prompt_name?: string | null;
     };
     /**
      * CaptureGenerationRequest
