@@ -89,6 +89,63 @@ export type UpdateGenerationBody = FixTypes<
   components['schemas']['UpdateGenerationBody']
 >;
 
+export type CreatePromptBody = FixTypes<
+  components['schemas']['CreatePromptBody']
+>;
+export type GetPromptInfoResponse = FixTypes<
+  components['schemas']['GetPromptInfoResponse']
+>;
+export type CreatePromptVersionBody = FixTypes<
+  components['schemas']['CreatePromptVersionBody']
+>;
+export type GetPromptVersionBody = FixTypes<
+  components['schemas']['GetPromptVersionBody']
+>;
+export type GetPromptVersionResponse = FixTypes<
+  components['schemas']['GetPromptVersionResponse']
+>;
+
+export type Usage = {
+  prompt_tokens?: number | null;
+  completion_tokens?: number | null;
+  total_tokens?: number | null;
+};
+
+export type DatasetItem = {
+  uuid?: string | null;
+  inputs: {
+    [key: string]: unknown;
+  };
+  outputs?:
+    | {
+        [key: string]: unknown;
+      }
+    | unknown[]
+    | string
+    | null;
+  metadata?: {
+    [key: string]: unknown;
+  } | null;
+};
+
+export type Dataset = {
+  name: string;
+  created_at: string;
+  description?: string | null;
+  items: DatasetItem[];
+};
+
+export type JsonSchema = {
+  name: string;
+  schema: Record<string, any>;
+  strict: boolean;
+};
+
+export type ResponseFormat = {
+  type: 'json_object' | 'json_schema' | 'xml';
+  json_schema?: JsonSchema;
+};
+
 export type JsonType =
   | string
   | number
